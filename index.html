@@ -194,7 +194,7 @@
         <div class="bg-red-50 border-2 border-red-600 rounded-2xl p-6 text-center shadow-lg transform transition hover:scale-105">
           <h3 class="text-2xl font-bold text-red-700 mb-3">📱 Fastest Response: Text Us!</h3>
           <p class="text-base text-gray-700 mb-4">Texting is the quickest way to schedule your in-home vaccination or microchipping service.</p>
-          <a href="sms:+13476440551" 
+          <a href="sms:+13476440551" id="hero-text-btn"
              class="inline-block bg-red-600 text-white font-extrabold py-4 px-8 rounded-full shadow-md hover:bg-red-700 transition duration-300">
             Text (347) 644-0551
           </a>
@@ -220,7 +220,7 @@
     </a>
 
     <!-- Call button with phone number -->
-    <a href="tel:3476440551"
+    <a href="tel:3476440551" id="hero-call-btn"
        class="bg-black text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center space-x-2 max-w-xs mx-auto mb-4">
       <!-- Phone icon SVG -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"
@@ -473,7 +473,7 @@
                class="inline-block bg-red-700 text-white font-extrabold py-4 px-10 rounded-full shadow-lg hover:bg-red-800 transition-colors duration-300 text-xl mb-4">
                 📋 Book Your Appointment Now
             </a>
-            <p class="text-gray-500 text-sm">Or text us directly at <a href="sms:+13476440551" class="text-red-600 font-bold hover:underline">(347) 644-0551</a></p>
+            <p class="text-gray-500 text-sm">Or text us directly at <a href="sms:+13476440551" id="footer-text-btn" class="text-red-600 font-bold hover:underline">(347) 644-0551</a></p>
         </section>
         
         <!-- Business Card Section -->
@@ -592,6 +592,29 @@
             menuIconClose.classList.add('hidden');
         });
     });
+
+    // =============================================
+    // TEXT & CALL REDIRECT TO CONFIRMATION PAGES
+    // =============================================
+    function handleContactRedirect(btnId, nativeUrl, confirmationPage) {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = nativeUrl;
+                setTimeout(function() {
+                    window.location.href = confirmationPage;
+                }, 800);
+            });
+        }
+    }
+
+    // Hero "Text Us" button
+    handleContactRedirect('hero-text-btn', 'sms:+13476440551', 'confirmation-text.html');
+    // Hero "Call" button
+    handleContactRedirect('hero-call-btn', 'tel:3476440551', 'confirmation-call.html');
+    // Footer "text us" link
+    handleContactRedirect('footer-text-btn', 'sms:+13476440551', 'confirmation-text.html');
 </script>
 
 </body>
