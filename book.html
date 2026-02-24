@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book an Appointment - PetVax</title>
+    <link rel="icon" href="assets/logo-small.jpeg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+    <meta name="description" content="Book your at-home pet vaccination appointment with PetVax. Convenient, affordable, stress-free.">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C8PXRSP80T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-C8PXRSP80T');
+    </script>
+</head>
+<body class="bg-black text-gray-200">
+
+    <!-- Header -->
+    <header class="bg-red-700 text-white py-12 text-center rounded-b-3xl shadow-xl">
+        <div class="container mx-auto px-4">
+            <a href="index.html" class="text-white hover:text-gray-200 transition-colors">
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">PetVax</h1>
+            </a>
+            <p class="text-xl font-light max-w-2xl mx-auto">Book Your At-Home Appointment</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 max-w-3xl">
+
+        <section class="bg-white rounded-3xl shadow-lg p-8 md:p-12 text-black">
+            <h2 class="text-3xl font-bold text-red-700 mb-2 border-b-2 border-red-200 pb-3">Schedule Your Visit</h2>
+            <p class="text-gray-600 mb-8">Fill out the form below and we'll confirm your appointment within a few hours. All fields marked with <span class="text-red-600 font-bold">*</span> are required.</p>
+
+            <!--
+                FORM SUBMISSION SETUP:
+                ========================
+                This form uses Formsubmit.co (free, no account needed).
+                
+                TO ACTIVATE:
+                1. Replace "YOUR_EMAIL@example.com" below with your real email address.
+                2. Submit the form once — Formsubmit will send you a confirmation email.
+                3. Click the confirmation link — after that, all submissions go to your inbox.
+                
+                GOOGLE SHEETS: Use Zapier.com or Make.com to auto-forward form emails to a Google Sheet.
+                SMS ALERTS: Use Zapier.com to auto-send an SMS when a new form email arrives.
+            -->
+            <form 
+                action="https://formsubmit.co/michaelchristianandersen@outlook.com" 
+                method="POST"
+                class="space-y-6"
+                id="booking-form"
+            >
+                <!-- Formsubmit.co configuration -->
+                <input type="hidden" name="_next" value="https://www.petvax.org/confirmation.html">
+                <input type="hidden" name="_subject" value="New PetVax Appointment Booking!">
+                <input type="hidden" name="_captcha" value="true">
+                <input type="hidden" name="_template" value="table">
+                <!-- Honeypot anti-spam -->
+                <input type="text" name="_honey" style="display:none">
+
+                <!-- Owner Information -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">1</span>
+                        Your Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="owner-name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name <span class="text-red-600">*</span></label>
+                            <input type="text" id="owner-name" name="Owner Name" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
+                                placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Phone Number <span class="text-red-600">*</span></label>
+                            <input type="tel" id="phone" name="Phone Number" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
+                                placeholder="(347) 555-0123">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Email Address <span class="text-red-600">*</span></label>
+                            <input type="email" id="email" name="Email" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
+                                placeholder="john@example.com">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="address" class="block text-sm font-semibold text-gray-700 mb-1">Home Address <span class="text-red-600">*</span></label>
+                            <input type="text" id="address" name="Address" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
+                                placeholder="123 W 45th St, Apt 4B, New York, NY 10036">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- Pet Information -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">2</span>
+                        Pet Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="pet-name" class="block text-sm font-semibold text-gray-700 mb-1">Pet's Name <span class="text-red-600">*</span></label>
+                            <input type="text" id="pet-name" name="Pet Name" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
+                                placeholder="Buddy">
+                        </div>
+                        <div>
+                            <label for="pet-type" class="block text-sm font-semibold text-gray-700 mb-1">Pet Type <span class="text-red-600">*</span></label>
+                            <select id="pet-type" name="Pet Type" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors bg-white">
+                                <option value="" disabled selected>Select pet type</option>
+                                <option value="Dog">Dog</option>
+                                <option value="Cat">Cat</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="breed" class="block text-sm font-semibold text-gray-700 mb-1">Breed</label>
+                            <input type="text" id="breed" name="Breed"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors"
+                                placeholder="Golden Retriever">
+                        </div>
+                        <div>
+                            <label for="pet-age" class="block text-sm font-semibold text-gray-700 mb-1">Pet's Age <span class="text-red-600">*</span></label>
+                            <select id="pet-age" name="Pet Age" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors bg-white">
+                                <option value="" disabled selected>Select age range</option>
+                                <option value="Under 8 weeks">Under 8 weeks</option>
+                                <option value="8-12 weeks">8–12 weeks</option>
+                                <option value="12-16 weeks">12–16 weeks</option>
+                                <option value="4-12 months">4–12 months</option>
+                                <option value="1-3 years">1–3 years</option>
+                                <option value="3-7 years">3–7 years</option>
+                                <option value="7+ years">7+ years</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="block text-sm font-semibold text-gray-700 mb-2">Do you have additional pets to vaccinate at this visit?</p>
+                        <div class="flex space-x-6">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="Additional Pets" value="No" checked class="w-4 h-4 text-red-600 focus:ring-red-500">
+                                <span>No</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="Additional Pets" value="Yes" class="w-4 h-4 text-red-600 focus:ring-red-500">
+                                <span>Yes</span>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">If yes, please list details in the notes below.</p>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- Services Requested -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                        Services Needed
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-3">Select all that apply. Each vaccine or microchip is <strong class="text-red-600">$50</strong> including the visit.</p>
+                    
+                    <!-- Dog vaccines -->
+                    <div id="dog-vaccines">
+                        <p class="font-semibold text-gray-700 mb-2">Dog Vaccines:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Rabies (Dog)" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Rabies</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="DHPPi (Distemper Combo)" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>DHPPi (Distemper Combo)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Leptospirosis" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Leptospirosis</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Bordetella (Kennel Cough)" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Bordetella (Kennel Cough)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Lyme Disease" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Lyme Disease</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Canine Influenza" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Canine Influenza</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cat vaccines -->
+                    <div id="cat-vaccines">
+                        <p class="font-semibold text-gray-700 mb-2">Cat Vaccines:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Rabies (Cat)" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Rabies</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="FVRCP" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>FVRCP</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Feline Leukemia Virus" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Feline Leukemia Virus</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Microchip -->
+                    <div>
+                        <p class="font-semibold text-gray-700 mb-2">Additional Services:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Microchip" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Microchip</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors cursor-pointer">
+                                <input type="checkbox" name="Services" value="Not Sure - Need Consultation" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                                <span>Not sure — need consultation</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- Appointment Preferences -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">4</span>
+                        Preferred Appointment Time
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="preferred-date" class="block text-sm font-semibold text-gray-700 mb-1">Preferred Date <span class="text-red-600">*</span></label>
+                            <input type="date" id="preferred-date" name="Preferred Date" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label for="preferred-time" class="block text-sm font-semibold text-gray-700 mb-1">Preferred Time <span class="text-red-600">*</span></label>
+                            <select id="preferred-time" name="Preferred Time" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors bg-white">
+                                <option value="" disabled selected>Select a time</option>
+                                <option value="Morning (9am - 12pm)">Morning (9am – 12pm)</option>
+                                <option value="Afternoon (12pm - 3pm)">Afternoon (12pm – 3pm)</option>
+                                <option value="Late Afternoon (3pm - 6pm)">Late Afternoon (3pm – 6pm)</option>
+                                <option value="Evening (6pm - 8pm)">Evening (6pm – 8pm)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- How Did You Hear About Us -->
+                <div>
+                    <label for="referral" class="block text-sm font-semibold text-gray-700 mb-1">How did you hear about us?</label>
+                    <select id="referral" name="How Did You Hear About Us"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors bg-white">
+                        <option value="" disabled selected>Select one</option>
+                        <option value="Google Search">Google Search</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Friend or Family">Friend or Family</option>
+                        <option value="Flyer or Business Card">Flyer or Business Card</option>
+                        <option value="Vet Referral">Vet Referral</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Additional Notes</label>
+                    <textarea id="notes" name="Notes" rows="4"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-colors resize-y"
+                        placeholder="Any allergies, health concerns, multiple pets, special instructions, etc."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-red-700 text-white font-extrabold py-4 px-8 rounded-full shadow-lg hover:bg-red-800 transition-colors duration-300 text-lg">
+                        Book My Appointment
+                    </button>
+                    <p class="text-center text-sm text-gray-500 mt-3">We'll confirm your appointment via phone or text within a few hours.</p>
+                </div>
+            </form>
+
+            <!-- Alternative contact -->
+            <div class="mt-8 pt-6 border-t-2 border-gray-200 text-center">
+                <p class="text-gray-600 mb-3">Prefer to book directly? Text or call us:</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="sms:+13476440551" id="text-btn"
+                       class="inline-flex items-center justify-center bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-md hover:bg-red-700 transition duration-300">
+                        📱 Text (347) 644-0551
+                    </a>
+                    <a href="tel:3476440551" id="call-btn"
+                       class="inline-flex items-center justify-center bg-black text-white font-bold py-3 px-6 rounded-full shadow-md hover:bg-gray-800 transition duration-300">
+                        📞 Call (347) 644-0551
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-red-900 text-white py-8 text-center rounded-t-3xl shadow-inner">
+        <div class="container mx-auto px-4">
+            <p>&copy; 2025 PetVax. All rights reserved.</p>
+            <a href="index.html" class="text-red-300 hover:text-white transition-colors mt-2 inline-block">← Back to Home</a>
+        </div>
+    </footer>
+
+    <script>
+        // Set the minimum selectable date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('preferred-date').setAttribute('min', today);
+
+        // Show/hide vaccine sections based on pet type selection
+        const petType = document.getElementById('pet-type');
+        const dogVaccines = document.getElementById('dog-vaccines');
+        const catVaccines = document.getElementById('cat-vaccines');
+
+        petType.addEventListener('change', function() {
+            if (this.value === 'Dog') {
+                dogVaccines.style.display = 'block';
+                catVaccines.style.display = 'none';
+                // Uncheck hidden cat vaccines
+                catVaccines.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            } else if (this.value === 'Cat') {
+                dogVaccines.style.display = 'none';
+                catVaccines.style.display = 'block';
+                // Uncheck hidden dog vaccines
+                dogVaccines.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            }
+        });
+
+        // Disable submit button after click to prevent double submission
+        document.getElementById('booking-form').addEventListener('submit', function() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+        });
+
+        // Text button: open SMS app, then redirect to conversion tracking page
+        document.getElementById('text-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Open the SMS app
+            window.location.href = 'sms:+13476440551';
+            // Redirect to tracking page after a short delay (gives OS time to open SMS)
+            setTimeout(function() {
+                window.location.href = 'confirmation-text.html';
+            }, 800);
+        });
+
+        // Call button: open phone dialer, then redirect to conversion tracking page
+        document.getElementById('call-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Open the phone dialer
+            window.location.href = 'tel:3476440551';
+            // Redirect to tracking page after a short delay (gives OS time to open dialer)
+            setTimeout(function() {
+                window.location.href = 'confirmation-call.html';
+            }, 800);
+        });
+    </script>
+</body>
+</html>

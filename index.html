@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,6 +47,52 @@
             content: '-';
             transform: rotate(45deg);
         }
+        /* Floating Navbar */
+        #navbar {
+            transition: background-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        #navbar.scrolled {
+            background-color: rgba(185, 28, 28, 1) !important; /* red-700 */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        #navbar.scrolled .nav-link {
+            color: #fff !important;
+        }
+        #navbar.scrolled .nav-link:hover {
+            color: #fecaca !important; /* red-200 */
+        }
+        #navbar.scrolled .nav-logo {
+            color: #fff !important;
+        }
+        #navbar.scrolled #mobile-menu-btn svg {
+            color: #fff !important;
+        }
+        #navbar .nav-link {
+            color: #374151; /* gray-700 */
+            transition: color 0.3s ease;
+        }
+        #navbar .nav-link:hover {
+            color: #b91c1c; /* red-700 */
+        }
+        /* Active nav link */
+        #navbar .nav-link.active-link {
+            color: #b91c1c;
+            font-weight: 700;
+        }
+        #navbar.scrolled .nav-link.active-link {
+            color: #fff;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: 9999px;
+        }
+        /* Mobile menu */
+        #mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        #mobile-menu.open {
+            max-height: 400px;
+        }
     </style>
     <meta name="description" content="PetVax provides affordable at-home pet vaccinations for cats and dogs in New York. Book your convenient mobile vet appointment today.">
 <meta name="keywords" content="pet vaccination, at-home vet, dog vaccines, cat vaccines, mobile vet NYC, Albany pet care, PetVax, affordable pet vaccines">
@@ -67,6 +113,80 @@
 </script>
 </head>
 <body class="bg-black text-gray-200">
+
+    <!-- Floating Navbar -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4 flex items-center justify-between h-16">
+            <!-- Logo -->
+            <a href="#" class="nav-logo text-xl font-extrabold text-red-700 tracking-tight flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+                <span>PetVax</span>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="#about" class="nav-link flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <span>About</span>
+                </a>
+                <a href="#services" class="nav-link flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Services</span>
+                </a>
+                <a href="#schedules" class="nav-link flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Schedules</span>
+                </a>
+                <a href="#contact-form" class="nav-link flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c1.21.34 2 .57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <span>Contact</span>
+                </a>
+                <a href="book.html" class="ml-2 bg-red-700 text-white font-bold text-sm py-2 px-5 rounded-full shadow hover:bg-red-800 transition-colors duration-300 flex items-center space-x-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+                    <span>Book Now</span>
+                </a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Toggle menu">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path id="menu-icon-open" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    <path id="menu-icon-close" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" class="hidden" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-1">
+                <a href="#about" class="nav-link mobile-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <span>About Us</span>
+                </a>
+                <a href="#services" class="nav-link mobile-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Services</span>
+                </a>
+                <a href="#schedules" class="nav-link mobile-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Schedules</span>
+                </a>
+                <a href="#contact-form" class="nav-link mobile-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c1.21.34 2 .57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <span>Contact</span>
+                </a>
+                <a href="book.html" class="flex items-center justify-center space-x-2 bg-red-700 text-white font-bold text-sm py-3 px-5 rounded-full shadow hover:bg-red-800 transition-colors duration-300 mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+                    <span>Book Now</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Spacer for fixed navbar -->
+    <div class="h-16"></div>
 
     <!-- Hero Section -->
 <header class="bg-red-700 text-white py-24 text-center rounded-b-3xl shadow-xl">
@@ -92,6 +212,12 @@
     <p class="text-xl sm:text-2xl font-light max-w-2xl mx-auto mb-8">
       Your Convenient At-Home Pet Vaccination Service Only
     </p>
+
+    <!-- Book Now button -->
+    <a href="book.html"
+       class="bg-white text-red-700 font-extrabold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition-colors duration-300 flex items-center justify-center space-x-2 max-w-xs mx-auto mb-4">
+      <span>📋 Book Appointment</span>
+    </a>
 
     <!-- Call button with phone number -->
     <a href="tel:3476440551"
@@ -340,9 +466,14 @@
         </section>
 
         <!-- Form Section -->
-        <section id="contact-form" class="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-16 text-black">
+        <section id="contact-form" class="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-16 text-black text-center">
             <h2 class="text-3xl font-bold text-red-700 mb-6 border-b-2 border-red-200 pb-3">Book an Appointment</h2>
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe75nI1PPp8Z81k16figqBGx3zZMIzM1uUg1SF8db5GwobS3w/viewform?embedded=true" class="w-full h-[993px] rounded-2xl" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            <p class="text-lg text-gray-700 mb-6">Ready to protect your furry friend? Schedule your convenient at-home vaccination visit in just a few minutes.</p>
+            <a href="book.html"
+               class="inline-block bg-red-700 text-white font-extrabold py-4 px-10 rounded-full shadow-lg hover:bg-red-800 transition-colors duration-300 text-xl mb-4">
+                📋 Book Your Appointment Now
+            </a>
+            <p class="text-gray-500 text-sm">Or text us directly at <a href="sms:+13476440551" class="text-red-600 font-bold hover:underline">(347) 644-0551</a></p>
         </section>
         
         <!-- Business Card Section -->
@@ -410,6 +541,57 @@
             openTab(firstTab.dataset.target);
         }
     };
+
+    // =============================================
+    // FLOATING NAVBAR: scroll color + active state
+    // =============================================
+    const navbar = document.getElementById('navbar');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const menuIconClose = document.getElementById('menu-icon-close');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section[id]');
+
+    // Scroll: toggle white → red bg
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 60) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+
+        // Highlight active section link
+        let currentSection = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            if (window.scrollY >= sectionTop) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+        navLinks.forEach(link => {
+            link.classList.remove('active-link');
+            if (link.getAttribute('href') === '#' + currentSection) {
+                link.classList.add('active-link');
+            }
+        });
+    });
+
+    // Mobile menu toggle
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('open');
+        menuIconOpen.classList.toggle('hidden');
+        menuIconClose.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when a link is clicked
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.remove('open');
+            menuIconOpen.classList.remove('hidden');
+            menuIconClose.classList.add('hidden');
+        });
+    });
 </script>
 
 </body>
