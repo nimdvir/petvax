@@ -54,6 +54,37 @@
             content: '-';
             transform: rotate(45deg);
         }
+        /* "Text us" number: navbar pill on wide screens, bottom bar on phones/tablets — both appear on scroll */
+        #navbar .nav-text {
+            display: none;
+        }
+        .sticky-text-bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 40;
+            background-color: #b91c1c; /* red-700 */
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.125rem;
+            text-align: center;
+            padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .sticky-text-bar.visible {
+            transform: translateY(0);
+        }
+        @media (min-width: 1024px) {
+            #navbar.scrolled .nav-text {
+                display: inline-flex;
+            }
+            .sticky-text-bar {
+                display: none;
+            }
+        }
         /* Floating Navbar */
         #navbar {
             transition: background-color 0.35s ease, box-shadow 0.35s ease;
@@ -153,6 +184,9 @@
                 <a href="#contact-form" class="nav-link flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-semibold">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c1.21.34 2 .57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     <span>Contact</span>
+                </a>
+                <a href="sms:+13476440551" id="nav-text-btn" class="nav-text items-center ml-2 bg-white text-red-700 font-extrabold text-sm py-2 px-4 rounded-full shadow whitespace-nowrap">
+                    💬 Text (347) 644-0551
                 </a>
                 <a href="book.html" class="ml-2 bg-red-700 text-white font-bold text-sm py-2 px-5 rounded-full shadow hover:bg-red-800 transition-colors duration-300 flex items-center space-x-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
@@ -496,7 +530,10 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-red-900 text-white py-8 text-center rounded-t-3xl shadow-inner">
+    <!-- Sticky "Text us" bar (phones/tablets, appears on scroll) -->
+    <a href="sms:+13476440551" id="sticky-text-btn" class="sticky-text-bar">💬 Text us: (347) 644-0551</a>
+
+    <footer class="bg-red-900 text-white pt-8 pb-20 lg:pb-8 text-center rounded-t-3xl shadow-inner">
         <div class="container mx-auto px-4">
             <p>&copy; 2025 PetVax. All rights reserved.</p>
         </div>
@@ -563,6 +600,7 @@
     const menuIconClose = document.getElementById('menu-icon-close');
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('section[id]');
+    const stickyTextBar = document.getElementById('sticky-text-btn');
 
     // Scroll: toggle white → red bg
     window.addEventListener('scroll', () => {
@@ -571,6 +609,8 @@
         } else {
             navbar.classList.remove('scrolled');
         }
+        // Show the bottom "Text us" bar once the hero text button is out of view
+        stickyTextBar.classList.toggle('visible', window.scrollY > 400);
 
         // Highlight active section link
         let currentSection = '';
@@ -626,6 +666,9 @@
     handleContactRedirect('hero-call-btn', 'tel:3476440551', 'confirmation-call.html');
     // Footer "text us" link
     handleContactRedirect('footer-text-btn', 'sms:+13476440551', 'confirmation-text.html');
+    // Navbar and sticky-bar "Text us" numbers (shown on scroll)
+    handleContactRedirect('nav-text-btn', 'sms:+13476440551', 'confirmation-text.html');
+    handleContactRedirect('sticky-text-btn', 'sms:+13476440551', 'confirmation-text.html');
 </script>
 
 </body>
