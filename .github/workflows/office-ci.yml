@@ -1,0 +1,48 @@
+name: PetVax Office CI
+
+on:
+  pull_request:
+    paths: ["office/**", ".github/workflows/office-ci.yml"]
+  push:
+    branches: ["main"]
+    paths: ["office/**"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: office
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: office/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - name: Start local Supabase (test data only)
+        run: npm run db:start
+      - name: Write local env
+        run: |
+          npx supabase status -o json > /tmp/sb.json
+          node -e 'const s=require("/tmp/sb.json");require("fs").writeFileSync(".env.local",`NEXT_PUBLIC_SUPABASE_URL=${s.API_URL}\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${s.PUBLISHABLE_KEY}\nSUPABASE_SECRET_KEY=${s.SECRET_KEY}\nNEXT_PUBLIC_SITE_URL=http://localhost:3000\n`)'
+      - run: npm run test:integration
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Backup / restore drill
+        run: scripts/restore-drill.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-results
+          path: office/test-results
