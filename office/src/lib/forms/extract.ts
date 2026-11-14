@@ -21,7 +21,8 @@ export interface PetData {
   species_other: string | null;
   breed: string | null;
   color: string | null;
-  sex: "male" | "female" | "unknown";
+  /** null when the form didn't ask or the client didn't answer — never overwrites a known value. */
+  sex: "male" | "female" | null;
   spayed_neutered: boolean | null;
   date_of_birth: string | null;
   estimated_age_years: number | null;
@@ -105,7 +106,7 @@ function sex(v: AnswerValue | undefined): PetData["sex"] {
   const s = str(v)?.toLowerCase() ?? "";
   if (s.startsWith("m")) return "male";
   if (s.startsWith("f")) return "female";
-  return "unknown";
+  return null;
 }
 
 function contact(v: AnswerValue | undefined): OwnerData["preferred_contact"] {

@@ -140,7 +140,7 @@ test("vet runs the full visit: request → schedule → exam → vaccines → ce
   await expect(page).toHaveURL(/\/pets\/[0-9a-f-]{36}/);
   await expect(page.getByRole("cell", { name: "Rabies (3-year)" })).toBeVisible();
   await expect(page.getByText(number)).toBeVisible();
-  await expect(page.getByRole("img", { name: /Signature of Jordan Ellis/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Signature of Jordan Ellis/ }).first()).toBeVisible();
   await page.screenshot({ path: "test-results/desktop-pet-history.png", fullPage: true });
 });
 
@@ -180,6 +180,8 @@ test("returning client reusing the link updates their record instead of duplicat
   await page.getByRole("link", { name: "Pepper" }).first().click();
   await expect(page).toHaveURL(/\/pets\/[0-9a-f-]{36}/);
   await expect(page.getByText(/Jordan Ellis\d+ \(Owner\)/)).toHaveCount(2);
+  // The consent form doesn't ask about sex; the "Female" from the first form must still be there.
+  await expect(page.getByText("female (spayed/neutered)")).toBeVisible();
 });
 
 test("admin customizes the form; the public link shows the new question", async ({ page }) => {

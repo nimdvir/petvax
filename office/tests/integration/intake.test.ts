@@ -107,6 +107,22 @@ describe("returning clients and duplicate prevention", () => {
     expect(petCount).toHaveLength(3);
   });
 
+  it("a later form that doesn't ask a question never erases what's on file", async () => {
+    const first = answers();
+    const r1 = await submit(first);
+    const consentForm = DEFAULT_FORMS.find((f) => f.slug === "vaccination-consent")!;
+    const later = validateAnswers(consentForm.schema, {
+      first_name: first.first_name, last_name: first.last_name, address_line1: "500 W 43rd St", city: "New York", state: "NY",
+      postal_code: "10036", phone: first.phone, email: first.email,
+      pets: [{ pet_name: "Rex", species: "Dog", had_reaction: "no" }],
+    });
+    if (!later.ok) throw new Error(JSON.stringify(later.errors));
+    const r2 = await processSubmission(adminClient(), { formVersionId: null, formLinkId: null, schema: consentForm.schema, consentText: consentForm.consentText, answers: later.answers, signature: sig("Dana Rivera") });
+    expect(r2.petIds[0]).toBe(r1.petIds[0]);
+    const rex = (await adminClient().from("pets").select("sex, breed, color, spayed_neutered").eq("id", r1.petIds[0]).single()).data!;
+    expect(rex).toMatchObject({ sex: "male", breed: "Beagle", color: "Tricolor", spayed_neutered: true });
+  });
+
   it("flags a same-name client with different contact details for review instead of merging", async () => {
     const first = answers();
     const r1 = await submit(first);

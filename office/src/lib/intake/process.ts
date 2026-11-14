@@ -83,7 +83,7 @@ async function loadCandidates(db: Db, email: string | null, phone: string | null
 
 function petRow(p: PetData, source: "petvax" | "jotform") {
   return {
-    name: p.name, species: p.species, species_other: p.species_other, breed: p.breed, color: p.color, sex: p.sex,
+    name: p.name, species: p.species, species_other: p.species_other, breed: p.breed, color: p.color, sex: p.sex ?? ("unknown" as const),
     spayed_neutered: p.spayed_neutered, date_of_birth: p.date_of_birth, estimated_age_years: p.estimated_age_years,
     weight_lb: p.weight_lb, microchip: p.microchip, allergies: p.allergies, prior_reactions: p.prior_reactions,
     medical_conditions: p.medical_conditions, medications: p.medications, diet: p.diet,
@@ -167,7 +167,8 @@ export async function processSubmission(db: Db, input: ProcessInput): Promise<Pr
       if (match.kind === "existing") {
         petId = match.petId;
         const existing = must(await db.from("pets").select(PET_KEYS.join(",") + ", lifestyle").eq("id", petId).single(), "load pet") as unknown as Record<string, unknown>;
-        const update = mergeUpdates(existing, petRow(pet, source) as unknown as Record<string, unknown>, [...PET_KEYS]);
+        // Use the raw answer for sex so an unanswered question never replaces a known value with "unknown".
+        const update = mergeUpdates(existing, { ...petRow(pet, source), sex: pet.sex } as unknown as Record<string, unknown>, [...PET_KEYS]);
         const lifestyle = { ...((existing.lifestyle as Record<string, boolean>) ?? {}), ...pet.lifestyle };
         if (JSON.stringify(lifestyle) !== JSON.stringify(existing.lifestyle)) (update as Record<string, unknown>).lifestyle = lifestyle;
         if (Object.keys(update).length) {
