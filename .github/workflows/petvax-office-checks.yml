@@ -6,7 +6,7 @@ on:
       - ".github/workflows/petvax-office-checks.yml"
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   office-checks:
     runs-on: ubuntu-latest
@@ -18,33 +18,14 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
       - name: Install exact declared dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Validation tests
         run: npm test
       - name: Type check
         run: npm run lint
       - name: Build web application
         run: npm run build
-      - name: Export lockfile for reproducible commit
-        uses: actions/upload-artifact@v4
-        with:
-          name: petvax-office-package-lock
-          path: office/package-lock.json
-          retention-days: 7
-      - name: Commit resolved dependency lockfile to feature branch
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feature/petvax-office-supabase' }}
-        working-directory: .
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add office/package-lock.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(office): commit resolved dependency lockfile"
-            git push origin HEAD:feature/petvax-office-supabase
-          fi
