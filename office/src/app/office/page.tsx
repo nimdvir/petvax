@@ -26,7 +26,7 @@ export default async function OfficeDashboard() {
       <div className="stat"><strong>{pets.data?.length || 0}</strong><span>Pets shown</span></div>
       <div className="stat"><strong>{pending.length}</strong><span>Intakes needing review</span></div>
     </div>
-    <div className="row wrap"><a className="button" href="/office/appointments">Appointments</a>
+    <div className="row wrap"><a className="button" href="/office/appointments">Appointments</a><a className="button" href="/office/encounters">Clinical records</a>
       <span className="muted">Counts represent retrieved rows, not database-wide totals.</span></div>
     <section className="card stack"><h2>Recent intake submissions</h2>
       {submissions.data?.length ? <div className="tablewrap"><table><thead><tr><th>Received</th><th>Client</th><th>Pets</th><th>Status</th></tr></thead>
