@@ -9,7 +9,10 @@ values (true, 'PetVax', 'House-call pet vaccinations in New York City', null, 'p
         'This certificate reflects vaccinations recorded by PetVax. Keep it with your pet''s records.')
 on conflict (id) do nothing;
 
-insert into public.vaccine_products (name, vaccine_type, species, default_interval_months, is_rabies) values
+-- Safe to run twice: manufacturer is null, which a unique constraint doesn't treat as equal, so check by name + species.
+insert into public.vaccine_products (name, vaccine_type, species, default_interval_months, is_rabies)
+select v.name, v.vaccine_type, v.species::public.species, v.months, v.rabies
+from (values
   ('Rabies (1-year)', 'Rabies', 'dog', 12, true),
   ('Rabies (3-year)', 'Rabies', 'dog', 36, true),
   ('DHPP / DAPP', 'DHPP', 'dog', 12, false),
@@ -21,4 +24,5 @@ insert into public.vaccine_products (name, vaccine_type, species, default_interv
   ('Rabies (3-year)', 'Rabies', 'cat', 36, true),
   ('FVRCP', 'FVRCP', 'cat', 12, false),
   ('FeLV', 'FeLV', 'cat', 12, false)
-on conflict do nothing;
+) as v(name, vaccine_type, species, months, rabies)
+where not exists (select 1 from public.vaccine_products p where p.name = v.name and p.species = v.species::public.species);
