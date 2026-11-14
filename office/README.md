@@ -34,10 +34,12 @@ hosted @Sites PetVax Office app. Do not present it as a live replacement.
   no two-way calendar integration or reminders.
 - Clinical notes and vaccine entries are drafts only; no clinician finalization.
 - No signed official vaccination certificate PDF or secure email delivery yet.
-- A read-only Jotform export inventory CLI exists at scripts/jotform-dryrun.mjs,\n  with unit tests and per-form mapping; it does NOT transfer any records.\n- No Jotform import, attachment/signature reconciliation, backup restore test,
+- A read-only Jotform export inventory CLI exists at scripts/jotform-dryrun.mjs,
+  with unit tests and per-form mapping; it does NOT transfer any records.
+- No Jotform import, attachment/signature reconciliation, backup restore test,
   end-to-end testing, or production deployment.
-- No automatic lockfile yet (offline development environment).
-  Download the CI-generated lockfile artifact and commit it before deployment.
+- Dependency versions are pinned and the generated package-lock.json is committed.
+  CI validates the application using npm ci.
 
 ## Setup — staging only
 1. Verify whether the original @Sites Office can export its DB/records.
