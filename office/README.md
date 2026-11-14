@@ -34,7 +34,7 @@ hosted @Sites PetVax Office app. Do not present it as a live replacement.
   no two-way calendar integration or reminders.
 - Clinical notes and vaccine entries are drafts only; no clinician finalization.
 - No signed official vaccination certificate PDF or secure email delivery yet.
-- No Jotform import, attachment/signature reconciliation, backup restore test,
+- A read-only Jotform export inventory CLI exists at scripts/jotform-dryrun.mjs,\n  with unit tests and per-form mapping; it does NOT transfer any records.\n- No Jotform import, attachment/signature reconciliation, backup restore test,
   end-to-end testing, or production deployment.
 - No automatic lockfile yet (offline development environment).
   Download the CI-generated lockfile artifact and commit it before deployment.
@@ -67,7 +67,7 @@ hosted @Sites PetVax Office app. Do not present it as a live replacement.
 8. Test each end-to-end workflow, unauthorized access, import reconciliation,
    database backup/restore and iPhone/iPad layouts before promoting a release.
 
-## Architecture and safeguards
+## Jotform export inventory (offline only)\nUse a secured local export file and a separate field-ID mapping for each source form.\nRun: node scripts/jotform-dryrun.mjs /secure/submissions.json /secure/field-map.json\nThe output contains COUNTS ONLY, no customer details; do not commit the raw exports.\nThis is NOT an import and does not prove that records/attachments migrated.\n\n## Architecture and safeguards
 - Application depends on a server capable of Next.js rendering and API routes.
   GitHub Pages serves the existing static marketing website only; it cannot host
   this app's server API. Choose a separate Office hostname after verification.
