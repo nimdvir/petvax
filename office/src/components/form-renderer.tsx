@@ -139,6 +139,8 @@ export function FormRenderer({ schema, consentText, title, description, endpoint
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "failed">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [website, setWebsite] = useState(""); // honeypot
+  // One key per page load: double-taps and retries are saved only once.
+  const [submissionKey] = useState(() => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : null));
 
   const groups = useMemo(() => (repeat ? ((values[repeat.id] as Values[]) ?? []) : []), [values, repeat]);
   const clearError = (key: string) => setErrors((prev) => {
@@ -178,6 +180,7 @@ export function FormRenderer({ schema, consentText, title, description, endpoint
           answers: values,
           signature: schema.consent?.enabled ? { signerName, relationship, agreed, esignAgreed, dataUrl: signature } : null,
           website,
+          submissionKey,
         }),
       });
       const body = await res.json().catch(() => ({}));

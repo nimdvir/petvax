@@ -134,6 +134,20 @@ describe("returning clients and duplicate prevention", () => {
     expect(o.possible_duplicate_of).toContain(r1.ownerId);
   });
 
+  it("a double-tapped submit (same submission key) is saved once", async () => {
+    const a = answers();
+    const key = crypto.randomUUID();
+    const send = () => processSubmission(adminClient(), { formVersionId: versionId, formLinkId: null, schema: form.schema, consentText: form.consentText, answers: a, signature: sig("Dana Rivera"), idempotencyKey: key });
+    const [x, y] = await Promise.all([send(), send()]);
+    const z = await send();
+    expect([x.status, y.status].sort()).toEqual(["duplicate", "processed"]);
+    expect(z.status).toBe("duplicate");
+    const subs = await adminClient().from("intake_submissions").select("id").eq("idempotency_key", key);
+    expect(subs.data).toHaveLength(1);
+    const consents = await adminClient().from("signed_consents").select("id").eq("submission_id", subs.data![0].id);
+    expect(consents.data).toHaveLength(2); // one per pet, not doubled
+  });
+
   it("keeps the raw submission even when processing fails", async () => {
     const a = answers();
     const r = await processSubmission(adminClient(), { formVersionId: versionId, formLinkId: null, schema: form.schema, consentText: form.consentText, answers: a, signature: { ...sig("X"), dataUrl: "data:image/png;base64," } });

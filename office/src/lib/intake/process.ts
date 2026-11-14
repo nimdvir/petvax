@@ -22,13 +22,15 @@ export interface ProcessInput {
   submittedAt?: string;
   source?: "petvax" | "jotform";
   externalId?: string | null;
+  /** Random key generated once per form page load; repeats of the same key are ignored. */
+  idempotencyKey?: string | null;
   /** For imports: signature image already fetched from the source system. */
   signatureImage?: { bytes: Uint8Array; contentType: string } | null;
 }
 
 export interface ProcessResult {
   submissionId: string;
-  status: "processed" | "needs_review" | "error";
+  status: "processed" | "needs_review" | "error" | "duplicate";
   ownerId: string | null;
   petIds: string[];
   consentIds: string[];
@@ -101,20 +103,30 @@ function decodePng(dataUrl: string): Uint8Array {
  */
 export async function processSubmission(db: Db, input: ProcessInput): Promise<ProcessResult> {
   const source = input.source ?? "petvax";
-  const submission = must(
-    await db.from("intake_submissions").insert({
-      form_version_id: input.formVersionId,
-      form_link_id: input.formLinkId,
-      answers: asJson(input.answers),
-      status: "received",
-      ip_address: input.ipAddress ?? null,
-      user_agent: input.userAgent?.slice(0, 500) ?? null,
-      submitted_at: input.submittedAt ?? new Date().toISOString(),
-      source,
-      external_id: input.externalId ?? null,
-    }).select("id").single(),
-    "save submission",
-  );
+  if (input.idempotencyKey) {
+    const seen = await db.from("intake_submissions").select("id, status, owner_id, pet_ids").eq("idempotency_key", input.idempotencyKey).maybeSingle();
+    if (seen.data) {
+      return { submissionId: seen.data.id, status: "duplicate", ownerId: seen.data.owner_id, petIds: seen.data.pet_ids, consentIds: [], appointmentId: null };
+    }
+  }
+  const inserted = await db.from("intake_submissions").insert({
+    form_version_id: input.formVersionId,
+    form_link_id: input.formLinkId,
+    answers: asJson(input.answers),
+    status: "received",
+    ip_address: input.ipAddress ?? null,
+    user_agent: input.userAgent?.slice(0, 500) ?? null,
+    submitted_at: input.submittedAt ?? new Date().toISOString(),
+    source,
+    external_id: input.externalId ?? null,
+    idempotency_key: input.idempotencyKey ?? null,
+  }).select("id").single();
+  // Two simultaneous requests with the same key: the second loses the race on the unique index.
+  if (inserted.error?.code === "23505" && input.idempotencyKey && inserted.error.message.includes("idempotency")) {
+    const seen = await db.from("intake_submissions").select("id, owner_id, pet_ids").eq("idempotency_key", input.idempotencyKey).single();
+    return { submissionId: seen.data?.id ?? "", status: "duplicate", ownerId: seen.data?.owner_id ?? null, petIds: seen.data?.pet_ids ?? [], consentIds: [], appointmentId: null };
+  }
+  const submission = must(inserted, "save submission");
 
   const result: ProcessResult = { submissionId: submission.id, status: "processed", ownerId: null, petIds: [], consentIds: [], appointmentId: null };
   try {

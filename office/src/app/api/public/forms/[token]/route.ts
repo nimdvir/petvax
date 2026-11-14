@@ -19,6 +19,17 @@ function throttled(key: string, limit = 10, windowMs = 10 * 60_000): boolean {
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
+  // Only accept submissions sent from our own pages (blocks other websites posting into the form).
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (origin) {
+    let originHost = "";
+    try { originHost = new URL(origin).host; } catch { /* malformed */ }
+    if (!host || originHost !== host) return NextResponse.json({ error: "Submission rejected." }, { status: 403 });
+  }
+  if (!request.headers.get("content-type")?.startsWith("application/json")) {
+    return NextResponse.json({ error: "Invalid submission." }, { status: 415 });
+  }
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || null;
   if (throttled(`${ip}:${token}`)) {
     return NextResponse.json({ error: "Too many submissions. Please wait a few minutes or contact us." }, { status: 429 });
@@ -30,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const form = await loadPublicForm(db, token);
   if (!form) return NextResponse.json({ error: "This form link is no longer active. Please contact PetVax for a new link." }, { status: 404 });
 
-  let body: { answers?: unknown; signature?: unknown; website?: string };
+  let body: { answers?: unknown; signature?: unknown; website?: string; submissionKey?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -55,6 +66,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     signature: signature.signature,
     linkOwnerId: form.ownerId,
     linkAppointmentId: form.appointmentId,
+    idempotencyKey: typeof body.submissionKey === "string" && /^[0-9a-f-]{36}$/i.test(body.submissionKey) ? body.submissionKey : null,
     ipAddress: ip,
     userAgent: request.headers.get("user-agent"),
   });

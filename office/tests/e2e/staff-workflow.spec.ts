@@ -21,6 +21,11 @@ test("signed-out visitors cannot reach Office pages or files", async ({ page, re
   await expect(page).toHaveURL(/\/login\?next=%2Fclients/);
   const pdf = await request.get("/api/certificates/00000000-0000-0000-0000-000000000000/pdf", { maxRedirects: 0 });
   expect([302, 307, 401]).toContain(pdf.status());
+  // Another website can't post into a PetVax form.
+  const { links } = ctx();
+  const token = links["PetVax New Visit Form"].split("/f/")[1];
+  const foreign = await request.post(`/api/public/forms/${token}`, { headers: { Origin: "https://evil.example", "Content-Type": "application/json" }, data: { answers: {} } });
+  expect(foreign.status()).toBe(403);
   const exp = await request.get("/api/export", { maxRedirects: 0 });
   expect([302, 307, 401, 403]).toContain(exp.status());
 });

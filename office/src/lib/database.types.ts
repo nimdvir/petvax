@@ -747,6 +747,7 @@ export type Database = {
           form_link_id: string | null;
           form_version_id: string | null;
           id: string;
+          idempotency_key: string | null;
           ip_address: unknown;
           match_result: Json | null;
           owner_id: string | null;
@@ -767,6 +768,7 @@ export type Database = {
           form_link_id?: string | null;
           form_version_id?: string | null;
           id?: string;
+          idempotency_key?: string | null;
           ip_address?: unknown;
           match_result?: Json | null;
           owner_id?: string | null;
@@ -786,6 +788,7 @@ export type Database = {
           form_link_id?: string | null;
           form_version_id?: string | null;
           id?: string;
+          idempotency_key?: string | null;
           ip_address?: unknown;
           match_result?: Json | null;
           owner_id?: string | null;
