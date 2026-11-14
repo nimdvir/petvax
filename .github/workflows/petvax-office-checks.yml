@@ -1,0 +1,31 @@
+name: PetVax Office checks
+on:
+  pull_request:
+    paths:
+      - "office/**"
+      - ".github/workflows/petvax-office-checks.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  office-checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: office
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install exact declared dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validation tests
+        run: npm test
+      - name: Type check
+        run: npm run lint
+      - name: Build web application
+        run: npm run build
