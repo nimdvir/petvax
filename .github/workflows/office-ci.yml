@@ -25,6 +25,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: office/package-lock.json
+      - name: Install pdftotext (certificate tests read text back out of generated PDFs)
+        run: sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
