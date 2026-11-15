@@ -32,7 +32,15 @@ export type QuickResult =
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" && v.trim() ? v.trim() : null);
-const date = (v: FormDataEntryValue | null) => { const s = str(v); return s && DATE.test(s) ? s : null; };
+/** Verify calendar dates (e.g. reject Feb 30) before a clinical record can be created. */
+const date = (v: FormDataEntryValue | null) => {
+  const s = str(v);
+  if (!s || !DATE.test(s)) return null;
+  const [year, month, day] = s.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() + 1 === month && parsed.getUTCDate() === day ? s : null;
+};
 const int = (v: FormDataEntryValue | null) => { const s = str(v); return s && /^\d+$/.test(s) ? Number(s) : null; };
 
 /** Read the one-page certificate form. Each ticked vaccine's fields are named "<productId>.<field>". */
@@ -84,6 +92,8 @@ export async function createQuickCertificate(db: Db, input: QuickCertificateInpu
     if (!p || !p.active) { problems.push("One of the chosen vaccines is no longer in the vaccine list."); continue; }
     if (!v.manufacturer) problems.push(`${p.name}: enter the manufacturer.`);
     if (!v.lot_number && !v.serial_number) problems.push(`${p.name}: enter the lot or serial number.`);
+    if (v.lot_expiration && input.administeredOn && v.lot_expiration < input.administeredOn)
+      problems.push(`${p.name}: this vial expired before the vaccination date. Please check the lot details.`);
     if (p.is_rabies && !v.duration_months) problems.push(`${p.name}: choose 1 year or 3 years.`);
     const due = v.next_due_on ?? (v.duration_months && input.administeredOn ? addMonths(input.administeredOn, v.duration_months) : null);
     if (due && input.administeredOn && due <= input.administeredOn) problems.push(`${p.name}: next due date must be after the date given.`);
