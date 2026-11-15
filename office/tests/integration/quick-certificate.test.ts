@@ -104,6 +104,32 @@ describe("one-step certificate", () => {
     expect((await createQuickCertificate(tech.client, { ...parseQuickForm(petId, form({ administered_on: today })), issuerId: tech.userId, siteUrl: "http://x" })).ok).toBe(false);
   });
 
+  it("rejects expired vaccine vials before creating any records", async () => {
+    const before = await Promise.all([count("vaccinations"), count("encounters"), count("certificates")]);
+    const result = await createQuickCertificate(tech.client, {
+      ...parseQuickForm(petId, form({
+        administered_on: today, vaccine: dhpp.id,
+        [`${dhpp.id}.manufacturer`]: "TestPharma",
+        [`${dhpp.id}.lot_number`]: "EXPIRED-001",
+        [`${dhpp.id}.lot_expiration`]: "2020-01-01",
+      })), issuerId: tech.userId, siteUrl: "https://office.example.test",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.problems.join(" ")).toMatch(/expired/i);
+    expect(await Promise.all([count("vaccinations"), count("encounters"), count("certificates")])).toEqual(before);
+  });
+
+  it("rejects impossible calendar dates in the certificate form", () => {
+    const parsed = parseQuickForm(petId, form({
+      administered_on: "2026-02-30", vaccine: dhpp.id,
+      [`${dhpp.id}.lot_expiration`]: "2026-13-01",
+      [`${dhpp.id}.next_due_on`]: "2027-02-29",
+    }));
+    expect(parsed.administeredOn).toBe("");
+    expect(parsed.vaccines[0].lot_expiration).toBeNull();
+    expect(parsed.vaccines[0].next_due_on).toBeNull();
+  });
+
   it("does not let front-desk staff sign", async () => {
     const r = await createQuickCertificate(staff.client, {
       ...parseQuickForm(petId, form({ administered_on: today, vaccine: dhpp.id, [`${dhpp.id}.manufacturer`]: "X", [`${dhpp.id}.lot_number`]: "Y" })),
