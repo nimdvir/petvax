@@ -209,7 +209,7 @@ export async function buildSoapArchive(db: Db, soapNoteId: string, revisionNumbe
     csvRow:[nowNy(),"SOAP note",e.encounter_date,`${soapNoteId.slice(0,8)}-r${rev.revision}`,
       client,owner?.email ?? "",owner?.phone ?? "",petName,
       `SOAP revision ${rev.revision}; ${clinician}`,rev.status,fileName,folderPath.join("/"),
-      `${siteUrl.replace(/\\/$/,"")}/visits/${e.id}`,sha256Hex(pdf)],
+      `${siteUrl.replace(/\/$/,"")}/visits/${e.id}`,sha256Hex(pdf)],
   };
 }
 export async function archiveSoap(db: Db, opts: { soapNoteId: string; revisionNumber: number; siteUrl: string; cfg?: ArchiveConfig | null }) {
