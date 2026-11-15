@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyCertificate } from "@/lib/notify";
-import { archiveCertificate } from "@/lib/drive-archive";
+import { archiveCertificate, archiveSoap } from "@/lib/drive-archive";
 import { requireStaff } from "@/lib/auth";
 import { fbool, fdate, fint, fnum, fstr, msg } from "@/lib/fd";
 import { addMonths } from "@/lib/time";
@@ -67,6 +67,21 @@ export async function saveSoap(encounterId: string, fd: FormData) {
     const lb = data.weight_unit === "kg" ? Math.round(data.weight * 2.20462 * 100) / 100 : data.weight;
     if (enc.data) await supabase.from("pets").update({ weight_lb: lb }).eq("id", enc.data.pet_id);
   }
+  // Only finalized notes and dated amendments are archived, never unfinished drafts.
+  const shouldArchive = intent === "final" || (existing.data && existing.data.status !== "draft");
+  if (shouldArchive) after(async () => {
+    try {
+      const admin = createAdminClient();
+      const note = await admin.from("soap_notes").select("id").eq("encounter_id",encounterId).single();
+      if (!note.data) return;
+      const revisions = await admin.from("soap_note_revisions")
+        .select("revision,status").eq("soap_note_id",note.data.id)
+        .order("revision",{ascending:false}).limit(1);
+      const current = revisions.data?.[0];
+      if (current && (current.status === "final" || current.status === "amended"))
+        await archiveSoap(admin,{soapNoteId:note.data.id,revisionNumber:current.revision,siteUrl:publicEnv.siteUrl});
+    } catch (e) { console.error("SOAP Drive archive failed",e); }
+  });
   redirect(msg(page, "ok", intent === "final" ? "SOAP note finalized." : existing.data && existing.data.status !== "draft" ? "Amendment saved." : "Draft saved."));
 }
 
