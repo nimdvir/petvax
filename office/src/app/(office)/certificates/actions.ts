@@ -2,7 +2,6 @@
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
 import { fstr, msg } from "@/lib/fd";
-import { serverEnv } from "@/lib/env";
 import { escapeHtml, sendEmail } from "@/lib/email";
 import { formatDate } from "@/lib/time";
 import type { CertificateSnapshot } from "@/lib/certificates/data";
@@ -21,14 +20,13 @@ export async function emailCertificate(certificateId: string, fd: FormData) {
   const snap = cert!.snapshot as unknown as CertificateSnapshot;
   const subject = `${snap.pet.name}'s vaccination certificate from ${snap.business.name}`;
   const lines = snap.vaccinations.map((v) => `${v.vaccine_name} — given ${formatDate(v.administered_on)}${v.next_due_on ? `, next due ${formatDate(v.next_due_on)}` : ""}`);
-  const env = serverEnv();
   const result = await sendEmail({
     to: to!,
     subject,
     text: `Hi ${cert!.owners?.first_name},\n\nAttached is ${snap.pet.name}'s vaccination certificate (${snap.certificate_number}).\n\n${lines.join("\n")}\n\nThank you,\n${snap.business.name}`,
     html: `<p>Hi ${escapeHtml(cert!.owners?.first_name ?? "")},</p><p>Attached is <strong>${escapeHtml(snap.pet.name)}</strong>'s vaccination certificate (${escapeHtml(snap.certificate_number)}).</p><ul>${lines.map((l) => `<li>${escapeHtml(l)}</li>`).join("")}</ul><p>Thank you,<br>${escapeHtml(snap.business.name)}</p>`,
     attachments: [{ filename: `${snap.certificate_number}-${snap.pet.name.replace(/[^A-Za-z0-9]+/g, "-")}.pdf`, content: new Uint8Array(await file.data!.arrayBuffer()) }],
-  }, { apiKey: env.resendApiKey, from: env.emailFrom, replyTo: env.emailReplyTo });
+  });
   await supabase.from("email_deliveries").insert({
     certificate_id: certificateId, owner_id: cert!.owner_id, to_email: to!, subject, provider: result.provider,
     provider_message_id: result.status === "sent" ? result.messageId : null, status: result.status,

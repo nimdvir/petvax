@@ -36,7 +36,10 @@ The Office migrations don't touch those tables (Office tables are lowercase, e.g
    ```
    Sign in → *Forms* → *Install default forms* → copy the New Visit link.
 5. In *Settings*, fill in phone/contact details; in *Settings → Staff*, add each vet's credentials and license number.
-6. Optional: `RESEND_API_KEY` + a verified sending domain for certificate email.
+6. Email: set `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER=petvaxnyc@gmail.com` and `SMTP_PASSWORD` (a Google
+   "app password", not the normal password) in Vercel — or `RESEND_API_KEY` with a verified domain. Until one is set,
+   emails are logged as "not configured". *Settings → Send a copy of every form submission and certificate to*
+   controls the office copy (currently petvaxnyc@gmail.com).
 
 ## 3. Switching from Jotform
 

@@ -127,8 +127,8 @@ test("vet runs the full visit: request → schedule → exam → vaccines → ce
   // 8. Email: no provider is configured locally, so the attempt is logged as not sent.
   await page.getByText("I confirmed this address with the client").click();
   await page.getByRole("button", { name: "Send certificate" }).click();
-  await expect(page.getByText(/Not sent: RESEND_API_KEY is not set/)).toBeVisible();
-  await expect(page.getByText("not configured")).toBeVisible();
+  await expect(page.getByText(/Not sent: Email sending is not set up/)).toBeVisible();
+  await expect(page.getByText("not configured")).toHaveCount(2); // the office copy + the client email, both logged
 
   // 9. Public verification page.
   const verifyUrl = (await page.getByRole("link", { name: /\/verify\// }).getAttribute("href"))!;

@@ -1,5 +1,8 @@
 "use server";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyCertificate } from "@/lib/notify";
 import { requireStaff } from "@/lib/auth";
 import { fbool, fdate, fint, fnum, fstr, msg } from "@/lib/fd";
 import { addMonths } from "@/lib/time";
@@ -142,5 +145,7 @@ export async function issueVisitCertificate(encounterId: string, fd: FormData) {
   if (!ids.length) redirect(msg(page, "error", "Select at least one vaccine for the certificate."));
   const r = await issueCertificate(supabase, { vaccinationIds: ids, issuerId: userId, siteUrl: publicEnv.siteUrl });
   if (!r.ok) redirect(msg(page, "error", r.error ?? `Can't issue yet: ${r.readiness.blocking.join(" ")}`));
+  const certificateId = r.certificateId;
+  after(() => notifyCertificate(createAdminClient(), { certificateId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e)));
   redirect(msg(`/certificates/${r.certificateId}`, "ok", `Certificate ${r.certificateNumber} issued.`));
 }

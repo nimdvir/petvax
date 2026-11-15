@@ -35,6 +35,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               <Field label="Email"><Input name="email" defaultValue={s?.email ?? ""} /></Field>
               <Field label="Website"><Input name="website" defaultValue={s?.website ?? ""} /></Field>
               <Field label="Address (optional)"><Input name="address" defaultValue={s?.address ?? ""} /></Field>
+              <Field label="Send a copy of every form submission and certificate to" className="sm:col-span-2"
+                hint="Leave blank to turn copies off. Needs email sending set up (see docs/DEPLOYMENT.md).">
+                <Input type="email" name="notify_email" defaultValue={s?.notify_email ?? ""} />
+              </Field>
               <Field label="Certificate footer text" className="sm:col-span-2"><Textarea name="certificate_footer" defaultValue={s?.certificate_footer ?? ""} /></Field>
               <Field label="Certificate accent color"><Input type="color" name="certificate_accent_color" defaultValue={s?.certificate_accent_color} className="h-11" /></Field>
               <Field label="Default visit length (minutes)"><Input name="default_visit_minutes" defaultValue={s?.default_visit_minutes} /></Field>

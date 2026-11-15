@@ -1,8 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadPublicForm } from "@/lib/forms/public";
 import { validateAnswers, validateSignature } from "@/lib/forms/schema";
 import { processSubmission } from "@/lib/intake/process";
+import { notifySubmission } from "@/lib/notify";
+import { publicEnv } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +72,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     ipAddress: ip,
     userAgent: request.headers.get("user-agent"),
   });
+  if (result.status !== "duplicate" && result.submissionId) {
+    // Copy to the office inbox after responding, so the client never waits on email.
+    after(() => notifySubmission(db, { submissionId: result.submissionId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e)));
+  }
   if (result.status === "error") {
     // The raw submission is saved; staff will see it flagged in Office.
     console.error("submission processing failed", result.submissionId, result.error);

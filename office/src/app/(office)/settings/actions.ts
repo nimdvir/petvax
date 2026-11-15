@@ -12,6 +12,7 @@ export async function updateSettings(fd: FormData) {
     business_name: fstr(fd, "business_name") ?? "PetVax", tagline: fstr(fd, "tagline"), phone: fstr(fd, "phone"), email: fstr(fd, "email"),
     website: fstr(fd, "website"), address: fstr(fd, "address"), certificate_footer: fstr(fd, "certificate_footer"),
     certificate_accent_color: /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#b91c1c", default_visit_minutes: fint(fd, "default_visit_minutes") ?? 45,
+    notify_email: fstr(fd, "notify_email")?.toLowerCase() ?? null,
   }).eq("id", true).select("id").single();
   if (r.error) redirect(msg("/settings", "error", r.error.message));
   redirect(msg("/settings", "ok", "Settings saved. New certificates use them; issued certificates never change."));

@@ -15,9 +15,6 @@ export function serverEnv() {
   if (!secretKey) throw new Error("SUPABASE_SECRET_KEY is not configured");
   return {
     secretKey,
-    resendApiKey: process.env.RESEND_API_KEY ?? "",
-    emailFrom: process.env.EMAIL_FROM ?? "PetVax <certificates@petvax.org>",
-    emailReplyTo: process.env.EMAIL_REPLY_TO ?? "",
   };
 }
 

@@ -12,6 +12,7 @@ export type Database = {
           default_visit_minutes: number;
           email: string | null;
           id: boolean;
+          notify_email: string | null;
           phone: string | null;
           tagline: string | null;
           timezone: string;
@@ -27,6 +28,7 @@ export type Database = {
           default_visit_minutes?: number;
           email?: string | null;
           id?: boolean;
+          notify_email?: string | null;
           phone?: string | null;
           tagline?: string | null;
           timezone?: string;
@@ -41,6 +43,7 @@ export type Database = {
           default_visit_minutes?: number;
           email?: string | null;
           id?: boolean;
+          notify_email?: string | null;
           phone?: string | null;
           tagline?: string | null;
           timezone?: string;
