@@ -425,6 +425,7 @@ export type Database = {
           id: string;
           kind: string;
           record_id: string;
+          revision_no: number | null;
           status: string;
         };
         ComputedFields: never;
@@ -437,6 +438,7 @@ export type Database = {
           id?: string;
           kind: string;
           record_id: string;
+          revision_no?: number | null;
           status: string;
         };
         Update: {
@@ -448,6 +450,7 @@ export type Database = {
           id?: string;
           kind?: string;
           record_id?: string;
+          revision_no?: number | null;
           status?: string;
         };
         Relationships: [];
