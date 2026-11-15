@@ -28,11 +28,13 @@ Legend: **Done & tested** = implemented and verified by automated tests that wri
 | Vaccination records (all requested fields), history, traceable corrections | Done & tested | Records immutable; corrections supersede with a reason |
 | SOAP notes: S/O/A/P, vitals with units, BCS with scale, draft → final → amendments, attribution | Done & tested | Every save kept as a revision |
 | PDF certificates from saved records, numbered, stored, fingerprinted, downloadable/printable | Done & tested | Text extracted from the PDF is checked field by field |
-| Certificate email to client | Partial | Resend integration + delivery log; tested only with no API key (logged as "not configured") |
+| Certificate email to client | Partial | Gmail SMTP or Resend + delivery log; SMTP path tested end to end against a local mail catcher. Needs a Gmail app password (or Resend key) in Vercel |
+| Copy of every submission and certificate to petvaxnyc@gmail.com | Done & tested (local mail catcher) | Same email setup required on Vercel |
 | Never invent credentials/data | Done & tested | Issuing blocked without license number/credentials/required vaccine data |
 | Rabies certificate legal requirements | **Needs review** | Shows tag no., serial/lot, duration, administering licensed vet. Confirm against current NY State / NYC requirements before relying on it as an official rabies certificate |
 | Jotform import with external ids, idempotent, signatures/files/raw JSON preserved, reconciliation report | Done & tested (synthetic data) | **Blocked for real data**: needs a read-only API key from the Jotform account that owns forms 262500538572052 and 262500542108042 |
 | Backups & restore | Done & tested (local) | Restore drill proves identical data, chains, files |
-| Production database | **Blocked** | Migrations not applied to the PetVax Supabase project — needs owner approval (see DEPLOYMENT.md) |
-| Hosting / domain | **Blocked** | Not deployed; needs a hosting decision (Vercel suggested) |
+| Production database | Done | Applied to the PetVax Supabase project after a verified backup (the old tables held no rows); security advisor shows no issues for Office tables. The 7 old empty tables still have RLS off (not touched) |
+| Hosting / domain | Partial | Vercel project `petvax` (team dima-media) builds every push to this branch; behind Vercel login. No custom domain yet |
+| Staff accounts | Done | petvaxnyc@gmail.com (admin); Michael Christian Andersen (vet) — his credentials and license number must be entered in Settings → Staff before he can issue certificates |
 | Retire Jotform | Not started (by design) | Only after real import is reconciled and signatures/attachments verified |
