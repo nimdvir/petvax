@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { can, requireStaff } from "@/lib/auth";
-import { saveProduct, updateSettings } from "./actions";
+import { archiveMissingNow, saveProduct, updateSettings } from "./actions";
+import { archiveConfigFromEnv } from "@/lib/drive-archive";
+import { formatNyDateTime } from "@/lib/time";
+import { Badge } from "@/components/ui";
 import { Card, Field, Flash, Input, PageHeader, Select, Table, Td, Textarea } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
@@ -9,10 +12,12 @@ export const metadata = { title: "Settings" };
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const sp = await searchParams;
   const { supabase, profile } = await requireStaff();
-  const [settings, products] = await Promise.all([
+  const [settings, products, archiveLog] = await Promise.all([
     supabase.from("app_settings").select("*").eq("id", true).single(),
     supabase.from("vaccine_products").select("*").order("species").order("name"),
+    supabase.from("drive_archive_log").select("*").order("created_at", { ascending: false }).limit(10),
   ]);
+  const driveReady = !!archiveConfigFromEnv();
   const s = settings.data;
   const admin = can.admin(profile.role);
   return (
@@ -46,6 +51,30 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             </fieldset>
           </form>
         </Card>
+        {admin && (
+          <Card title="Google Drive archive" actions={driveReady ? <Badge color="green">connected</Badge> : <Badge color="yellow">not set up</Badge>}>
+            <div id="drive" />
+            <p className="mb-3 text-sm text-gray-600">
+              Every form submission (as a PDF with answers, consent and signature) and every certificate PDF is saved to the
+              Drive folder <strong>PetVax › PetVax Office archive</strong>, in <em>Form submissions</em> and <em>Certificates</em>
+              folders by month, with an <em>index.csv</em> listing every file.
+              {!driveReady && " Finish the one-time setup in docs/GOOGLE_DRIVE.md to turn it on."}
+            </p>
+            {driveReady && <form action={archiveMissingNow} className="mb-3"><SubmitButton variant="secondary" pendingText="Saving…">Save anything not yet in Drive</SubmitButton></form>}
+            {archiveLog.data?.length ? (
+              <ul className="space-y-1 text-sm">
+                {archiveLog.data.map((l) => (
+                  <li key={l.id} className="flex flex-wrap items-center gap-2">
+                    <span className="text-gray-500">{formatNyDateTime(l.created_at)}</span>
+                    <Badge color={l.status === "saved" ? "green" : l.status === "failed" ? "red" : "yellow"}>{l.status.replace("_", " ")}</Badge>
+                    {l.drive_url ? <a className="text-brand-700 underline" href={l.drive_url} target="_blank" rel="noreferrer">{l.file_name}</a> : <span>{l.file_name}</span>}
+                    {l.error && <span className="text-xs text-red-700">{l.error}</span>}
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="text-sm text-gray-500">Nothing saved yet.</p>}
+          </Card>
+        )}
         <Card title="Vaccine list">
           <div id="vaccines" />
           <p className="mb-3 text-sm text-gray-600">Choosing a vaccine during a visit fills in its type, rabies flag and next-due interval. Leave manufacturer blank if you stock more than one brand; the last lot used is suggested automatically.</p>

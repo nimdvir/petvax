@@ -4,6 +4,7 @@ import { loadPublicForm } from "@/lib/forms/public";
 import { validateAnswers, validateSignature } from "@/lib/forms/schema";
 import { processSubmission } from "@/lib/intake/process";
 import { notifySubmission } from "@/lib/notify";
+import { archiveSubmission } from "@/lib/drive-archive";
 import { publicEnv } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +75,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   });
   if (result.status !== "duplicate" && result.submissionId) {
     // Copy to the office inbox after responding, so the client never waits on email.
-    after(() => notifySubmission(db, { submissionId: result.submissionId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e)));
+    after(async () => {
+      await notifySubmission(db, { submissionId: result.submissionId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e));
+      await archiveSubmission(db, { submissionId: result.submissionId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("drive archive failed", e));
+    });
   }
   if (result.status === "error") {
     // The raw submission is saved; staff will see it flagged in Office.

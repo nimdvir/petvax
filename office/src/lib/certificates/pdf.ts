@@ -12,7 +12,7 @@ const PAGE_W = 612; // US Letter
 const PAGE_H = 792;
 const M = 44; // margin
 
-function hexToRgb(hex: string): RGB {
+export function hexToRgb(hex: string): RGB {
   const n = parseInt(hex.replace("#", ""), 16);
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
 }
@@ -26,7 +26,7 @@ const TRANSLIT: Record<string, string> = { "Ł": "L", "ł": "l", "Ø": "O", "ø"
 const COMBINING_MARKS = new RegExp("[\\u0300-\\u036f]", "g");
 
 /** Standard PDF fonts only cover WinAnsi; replace anything they can't draw instead of failing. */
-function makeSafe(font: PDFFont) {
+export function makeSafe(font: PDFFont) {
   const cache = new Map<string, boolean>();
   return (text: string | null | undefined): string => {
     if (!text) return "";
@@ -45,7 +45,7 @@ function makeSafe(font: PDFFont) {
   };
 }
 
-function wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
+export function wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const lines: string[] = [];
   for (const para of text.split("\n")) {
     let line = "";

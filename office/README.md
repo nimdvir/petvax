@@ -58,3 +58,4 @@ npm run dev
 - [docs/BACKUP.md](docs/BACKUP.md) — backups, restore and rollback
 - [docs/JOTFORM_MIGRATION.md](docs/JOTFORM_MIGRATION.md) — importing and verifying Jotform history
 - [docs/SECURITY.md](docs/SECURITY.md) — access model and safeguards
+- [docs/GOOGLE_DRIVE.md](docs/GOOGLE_DRIVE.md) — automatic Google Drive archive of submissions and certificates

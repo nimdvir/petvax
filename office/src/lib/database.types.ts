@@ -406,6 +406,43 @@ export type Database = {
           },
         ];
       };
+      drive_archive_log: {
+        Row: {
+          created_at: string;
+          drive_url: string | null;
+          error: string | null;
+          file_name: string;
+          folder: string;
+          id: string;
+          kind: string;
+          record_id: string;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          drive_url?: string | null;
+          error?: string | null;
+          file_name: string;
+          folder: string;
+          id?: string;
+          kind: string;
+          record_id: string;
+          status: string;
+        };
+        Update: {
+          created_at?: string;
+          drive_url?: string | null;
+          error?: string | null;
+          file_name?: string;
+          folder?: string;
+          id?: string;
+          kind?: string;
+          record_id?: string;
+          status?: string;
+        };
+        Relationships: [];
+      };
       email_deliveries: {
         Row: {
           certificate_id: string | null;

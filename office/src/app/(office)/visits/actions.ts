@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyCertificate } from "@/lib/notify";
+import { archiveCertificate } from "@/lib/drive-archive";
 import { requireStaff } from "@/lib/auth";
 import { fbool, fdate, fint, fnum, fstr, msg } from "@/lib/fd";
 import { addMonths } from "@/lib/time";
@@ -146,6 +147,10 @@ export async function issueVisitCertificate(encounterId: string, fd: FormData) {
   const r = await issueCertificate(supabase, { vaccinationIds: ids, issuerId: userId, siteUrl: publicEnv.siteUrl });
   if (!r.ok) redirect(msg(page, "error", r.error ?? `Can't issue yet: ${r.readiness.blocking.join(" ")}`));
   const certificateId = r.certificateId;
-  after(() => notifyCertificate(createAdminClient(), { certificateId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e)));
+  after(async () => {
+    const admin = createAdminClient();
+    await notifyCertificate(admin, { certificateId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e));
+    await archiveCertificate(admin, { certificateId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("drive archive failed", e));
+  });
   redirect(msg(`/certificates/${r.certificateId}`, "ok", `Certificate ${r.certificateNumber} issued.`));
 }

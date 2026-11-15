@@ -6,7 +6,7 @@ import { formSchemaSchema, type AnswerGroup, type FormSchema } from "@/lib/forms
 import { markReviewed, reprocess } from "../actions";
 import { Badge, Button, Card, DL, Flash, PageHeader, StatusBadge } from "@/components/ui";
 
-const show = (v: unknown) => (Array.isArray(v) ? v.join(", ") : v === true ? "Yes" : v === false ? "No" : v === null || v === undefined ? "" : String(v));
+const show = (v: unknown) => (Array.isArray(v) ? v.join(", ") : v === true || v === "yes" ? "Yes" : v === false || v === "no" ? "No" : v === null || v === undefined ? "" : String(v));
 
 function Answers({ schema, answers }: { schema: FormSchema | null; answers: Record<string, unknown> }) {
   if (!schema) return <pre className="overflow-x-auto rounded bg-gray-50 p-3 text-xs">{JSON.stringify(answers, null, 2)}</pre>;

@@ -36,5 +36,6 @@ Legend: **Done & tested** = implemented and verified by automated tests that wri
 | Backups & restore | Done & tested (local) | Restore drill proves identical data, chains, files |
 | Production database | Done | Applied to the PetVax Supabase project after a verified backup (the old tables held no rows); security advisor shows no issues for Office tables. The 7 old empty tables still have RLS off (not touched) |
 | Hosting / domain | Partial | Vercel project `petvax` (team dima-media) builds every push to this branch; behind Vercel login. No custom domain yet |
+| Save every submission + certificate PDF to Google Drive, with index.csv | Done & tested (simulated Drive) | The real Apps Script code is executed in tests against an in-memory Drive and called over HTTP by the app. Needs the one-time setup in GOOGLE_DRIVE.md; not yet run against the real Drive |
 | Staff accounts | Done | petvaxnyc@gmail.com (admin); Michael Christian Andersen (vet) — his credentials and license number must be entered in Settings → Staff before he can issue certificates |
 | Retire Jotform | Not started (by design) | Only after real import is reconciled and signatures/attachments verified |

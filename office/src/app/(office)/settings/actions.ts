@@ -75,3 +75,12 @@ export async function uploadSignature(userId: string, fd: FormData) {
   await supabase.from("staff_profiles").update({ signature_path: path }).eq("user_id", userId);
   redirect(msg("/settings/staff", "ok", "Signature image saved. It appears on certificates issued from now on."));
 }
+
+/** Save any submissions/certificates that are not in Google Drive yet (e.g. created before the archive was set up). */
+export async function archiveMissingNow() {
+  await requireStaff(["admin"]);
+  const { archiveMissing } = await import("@/lib/drive-archive");
+  const r = await archiveMissing(createAdminClient(), { siteUrl: publicEnv.siteUrl, limit: 25 });
+  if (r.error) redirect(msg("/settings", "error", r.error) + "#drive");
+  redirect(msg("/settings", r.failed ? "error" : "ok", `Saved ${r.saved} file(s) to Google Drive${r.failed ? `, ${r.failed} failed (see the log below)` : ""}${r.remaining ? `; ${r.remaining} still waiting — press again` : ""}.`) + "#drive");
+}
