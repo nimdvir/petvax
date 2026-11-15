@@ -49,6 +49,10 @@ export function QuickCertificateForm({ products, today, preselected, canSign }: 
   });
   const set = (id: string, k: string, val: string) => setRows((r) => ({ ...r, [id]: { ...r[id], [k]: val } }));
   const chosen = products.filter((p) => rows[p.id]);
+  const hasExpiredLot = chosen.some((p) => {
+    const row = rows[p.id];
+    return !!(row.lot_expiration && given && row.lot_expiration < given);
+  });
   const { pending } = useFormStatus();
 
   return (
@@ -113,7 +117,8 @@ export function QuickCertificateForm({ products, today, preselected, canSign }: 
       <label className="block"><span className="text-sm font-medium">Notes to print on the certificate (optional)</span>
         <textarea name="notes" rows={3} className={cls} placeholder="e.g. Healthy exam. T 101.5 °F, HR 140, RR 28. Next DHPP booster in 3 weeks." /></label>
 
-      <button type="submit" disabled={!canSign || chosen.length === 0 || pending}
+      {hasExpiredLot && <p className="text-sm font-semibold text-red-700" role="alert">Check the expired vial date before creating the certificate.</p>}
+      <button type="submit" disabled={!canSign || chosen.length === 0 || pending || hasExpiredLot}
         className="w-full rounded-lg bg-brand-700 px-4 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
         {pending ? "Creating certificate…" : <>Sign &amp; create certificate{chosen.length ? ` (${chosen.length} vaccine${chosen.length === 1 ? "" : "s"})` : ""}</>}
       </button>
