@@ -37,6 +37,11 @@ Legend: **Done & tested** = implemented and verified by automated tests that wri
 | Backups & restore | Done & tested (local) | Restore drill proves identical data, chains, files |
 | Production database | Done | Applied to the PetVax Supabase project after a verified backup (the old tables held no rows); security advisor shows no issues for Office tables. The 7 old empty tables still have RLS off (not touched) |
 | Hosting / domain | Partial | Vercel project `petvax` (team dima-media) builds every push to this branch; behind Vercel login. No custom domain yet |
-| Save every submission + certificate PDF to Google Drive, with index.csv | Done & tested (simulated Drive) | The real Apps Script code is executed in tests against an in-memory Drive and called over HTTP by the app. Needs the one-time setup in GOOGLE_DRIVE.md; not yet run against the real Drive |
+| Save form submissions, finalized SOAP notes/amendments and certificates to Drive, with index.csv | Done & tested (simulated Drive) | The real Apps Script code is executed in tests against an in-memory Drive and called over HTTP by the app. Needs the one-time setup in GOOGLE_DRIVE.md; not yet run against the real Drive |
 | Staff accounts | Done | petvaxnyc@gmail.com (admin); Michael Christian Andersen (vet) — credentials "LVT, VTS" entered; supervising veterinarian Rafla Beshoy, NY license 010766, in Settings (as on PetVax's existing certificates) |
 | Retire Jotform | Not started (by design) | Only after real import is reconciled and signatures/attachments verified |
+
+### 2026-11-14 additions
+- New SOAP PDF archive generator and immutable revision-based export are committed, with automated tests pending CI confirmation.
+- Google Drive still requires its owner-run Apps Script to be deployed and configured in Vercel; the current code does **not** yet save to real Drive.
+- `office.petvax.org` has been attached to the Vercel Office project and its development branch, but registrar DNS still requires a CNAME record before it resolves.
