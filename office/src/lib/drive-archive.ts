@@ -7,6 +7,7 @@ import { formSchemaSchema } from "@/lib/forms/schema";
 import { renderSubmissionPdf, type SubmissionPdfConsent } from "@/lib/submissions/pdf";
 import { sha256Hex } from "@/lib/tokens";
 import { formatDate, formatNyDateTime, utcToNyParts } from "@/lib/time";
+import { renderSoapArchivePdf } from "@/lib/soap/archive-pdf";
 
 type Db = SupabaseClient<Database>;
 
@@ -32,7 +33,8 @@ export const CSV_HEADERS = [
 ] as const;
 
 export interface ArchiveItem {
-  kind: "submission" | "certificate";
+  kind: "submission" | "certificate" | "soap";
+  revisionNo?: number;
   recordId: string;
   folderPath: string[];
   fileName: string;
@@ -79,7 +81,7 @@ async function post(item: ArchiveItem, cfg: ArchiveConfig | null): Promise<Archi
 async function send(db: Db, item: ArchiveItem, cfg: ArchiveConfig | null): Promise<ArchiveResult> {
   const result = await post(item, cfg);
   await db.from("drive_archive_log").insert({
-    kind: item.kind, record_id: item.recordId, file_name: item.fileName, folder: item.folderPath.join(" / "),
+    kind: item.kind, record_id: item.recordId, revision_no: item.revisionNo ?? null, file_name: item.fileName, folder: item.folderPath.join(" / "),
     status: result.status, drive_url: result.status === "saved" ? result.url : null,
     error: result.status === "saved" ? null : result.error,
   });
@@ -172,6 +174,49 @@ export async function buildCertificateArchive(db: Db, certificateId: string, sit
   };
 }
 
+/** Archive an immutable finalized or amended SOAP revision, never a mutable draft. */
+export async function buildSoapArchive(db: Db, soapNoteId: string, revisionNumber: number, siteUrl: string): Promise<ArchiveItem | null> {
+  const rev = (await db.from("soap_note_revisions")
+    .select("revision, status, snapshot, edited_at, soap_note_id, edited_by")
+    .eq("soap_note_id", soapNoteId).eq("revision", revisionNumber).maybeSingle()).data;
+  if (!rev || (rev.status !== "final" && rev.status !== "amended")) return null;
+  const snap = rev.snapshot as Record<string, unknown>;
+  const encounterId = snap.encounter_id;
+  if (typeof encounterId !== "string") return null;
+  const encounter = await db.from("encounters")
+    .select("id, encounter_date, pets(name,species), owners(first_name,last_name,email,phone), staff_profiles(full_name)")
+    .eq("id",encounterId).maybeSingle();
+  if (!encounter.data) return null;
+  const e = encounter.data;
+  const owner = e.owners;
+  const client = owner ? lastFirst(owner.first_name,owner.last_name) : "Unknown client";
+  const pet = e.pets;
+  const petName = pet?.name ?? "Unknown pet";
+  const clinician = e.staff_profiles?.full_name ?? "Not recorded";
+  const settings = await db.from("app_settings").select("business_name").eq("id",true).maybeSingle();
+  const businessName = settings.data?.business_name ?? "PetVax";
+  const local = utcToNyParts(rev.edited_at);
+  const folderPath = ["SOAP notes",local.date.slice(0,4),local.date.slice(0,7)];
+  const fileName = cleanName(`${e.encounter_date} - ${petName} - ${client} - SOAP revision ${rev.revision} - ${soapNoteId.slice(0,8)}`) + ".pdf";
+  const pdf = await renderSoapArchivePdf({
+    clinic:businessName,pet:petName,species:pet?.species ?? "Not recorded",
+    owner:owner ? `${owner.first_name} ${owner.last_name}`.trim() : client,
+    clinician,visitDate:e.encounter_date,savedAt:rev.edited_at,revision:rev.revision,
+    status:rev.status,note:snap,
+  });
+  return {
+    kind:"soap",recordId:soapNoteId,revisionNo:rev.revision,fileName,folderPath,pdf,
+    csvRow:[nowNy(),"SOAP note",e.encounter_date,`${soapNoteId.slice(0,8)}-r${rev.revision}`,
+      client,owner?.email ?? "",owner?.phone ?? "",petName,
+      `SOAP revision ${rev.revision}; ${clinician}`,rev.status,fileName,folderPath.join("/"),
+      `${siteUrl.replace(/\\/$/,"")}/visits/${e.id}`,sha256Hex(pdf)],
+  };
+}
+export async function archiveSoap(db: Db, opts: { soapNoteId: string; revisionNumber: number; siteUrl: string; cfg?: ArchiveConfig | null }) {
+  const item = await buildSoapArchive(db,opts.soapNoteId,opts.revisionNumber,opts.siteUrl);
+  return item ? send(db,item,opts.cfg === undefined ? archiveConfigFromEnv() : opts.cfg) : null;
+}
+
 export async function archiveSubmission(db: Db, opts: { submissionId: string; siteUrl: string; cfg?: ArchiveConfig | null }) {
   const item = await buildSubmissionArchive(db, opts.submissionId, opts.siteUrl);
   return item ? send(db, item, opts.cfg === undefined ? archiveConfigFromEnv() : opts.cfg) : null;
@@ -186,15 +231,27 @@ export async function archiveCertificate(db: Db, opts: { certificateId: string; 
 export async function archiveMissing(db: Db, opts: { siteUrl: string; cfg?: ArchiveConfig | null; limit?: number }) {
   const cfg = opts.cfg === undefined ? archiveConfigFromEnv() : opts.cfg;
   if (!cfg) return { saved: 0, failed: 0, remaining: null as number | null, error: "Google Drive archive is not set up." };
-  const saved = (await db.from("drive_archive_log").select("kind, record_id").eq("status", "saved")).data ?? [];
-  const done = new Set(saved.map((r) => `${r.kind}:${r.record_id}`));
+  const saved = (await db.from("drive_archive_log").select("kind, record_id, revision_no").eq("status", "saved")).data ?? [];
+  const done = new Set(saved.map((r) => r.kind === "soap"
+    ? `soap:${r.record_id}:${r.revision_no}` : `${r.kind}:${r.record_id}`));
   const subs = ((await db.from("intake_submissions").select("id").order("submitted_at")).data ?? []).filter((r) => !done.has(`submission:${r.id}`));
   const certs = ((await db.from("certificates").select("id").not("pdf_path", "is", null).order("issued_at")).data ?? []).filter((r) => !done.has(`certificate:${r.id}`));
-  const todo = [...subs.map((r) => ["submission", r.id] as const), ...certs.map((r) => ["certificate", r.id] as const)];
+  const revisions = (await db.from("soap_note_revisions")
+    .select("soap_note_id, revision, status").in("status", ["final", "amended"]).order("edited_at")).data ?? [];
+  const pendingSoap = revisions.filter((r) => !done.has(`soap:${r.soap_note_id}:${r.revision}`));
+  const todo = [
+    ...subs.map((r) => ({kind: "submission" as const,id:r.id,revision:0})),
+    ...certs.map((r) => ({kind: "certificate" as const,id:r.id,revision:0})),
+    ...pendingSoap.map((r) => ({kind: "soap" as const,id:r.soap_note_id,revision:r.revision}))
+  ];
   const batch = todo.slice(0, opts.limit ?? 25);
   let ok = 0, failed = 0;
-  for (const [kind, id] of batch) {
-    const r = kind === "submission" ? await archiveSubmission(db, { submissionId: id, siteUrl: opts.siteUrl, cfg }) : await archiveCertificate(db, { certificateId: id, siteUrl: opts.siteUrl, cfg });
+  for (const item of batch) {
+    const r = item.kind === "submission"
+      ? await archiveSubmission(db, { submissionId:item.id,siteUrl:opts.siteUrl,cfg })
+      : item.kind === "certificate"
+      ? await archiveCertificate(db, {certificateId:item.id,siteUrl:opts.siteUrl,cfg})
+      : await archiveSoap(db,{soapNoteId:item.id,revisionNumber:item.revision,siteUrl:opts.siteUrl,cfg});
     if (r?.status === "saved") ok++; else failed++;
   }
   return { saved: ok, failed, remaining: todo.length - batch.length, error: null };
