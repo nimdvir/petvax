@@ -32,7 +32,7 @@ describe("Google Drive archive", () => {
   it("saves each submission as a readable PDF with answers, consent and signature, and logs it in index.csv", async () => {
     const tag = uniq();
     const db = adminClient();
-    const t = await db.from("form_templates").insert({ slug: `drive-${tag}`, kind: "intake_consent", title: "PetVax New Visit Form" }).select("id").single();
+    const t = await db.from("form_templates").insert({ slug: `drive-${tag}`, kind: "intake_consent", title: `Drive Test Form ${tag}` }).select("id").single();
     const v = await db.from("form_versions").insert({ template_id: t.data!.id, version: 1, status: "published", schema: form.schema as never, consent_text: form.consentText, published_at: new Date().toISOString() }).select("id").single();
     const a = validateAnswers(form.schema, {
       first_name: "Robin", last_name: `Hale${tag}`, address_line1: "9 Grove St", city: "New York", state: "NY", postal_code: "10014",
@@ -51,9 +51,9 @@ describe("Google Drive archive", () => {
     const month = sub.folders[0].folders[0];
     expect(month.name).toMatch(/^\d{4}-\d{2}$/);
     const file = month.files.find((f) => f.name.includes(`Hale${tag}`))!;
-    expect(file.name).toMatch(new RegExp(`^\\d{4}-\\d{2}-\\d{2} \\d{4} - Hale${tag}, Robin - Olive - PetVax New Visit Form \\([0-9a-f]{8}\\)\\.pdf$`));
+    expect(file.name).toMatch(new RegExp(`^\\d{4}-\\d{2}-\\d{2} \\d{4} - Hale${tag}, Robin - Olive - Drive Test Form ${tag} \\([0-9a-f]{8}\\)\\.pdf$`));
     const text = pdfToText(new Uint8Array(file.content)).replace(/\s+/g, " ");
-    for (const s of ["PetVax New Visit Form (version 1)", "Robin", `Hale${tag}`, "9 Grove St", "Pet 1: Olive", "Siamese", "FVRCP", "Lethargy",
+    for (const s of [`Drive Test Form ${tag} (version 1)`, "Robin", `Hale${tag}`, "9 Grove St", "Pet 1: Olive", "Siamese", "FVRCP", "Lethargy",
       "Signed consent — Olive", "I authorize PetVax veterinary personnel", `Robin Hale${tag} (Owner)`, "Record hash:", "198.51.100.7"]) {
       expect(text, s).toContain(s);
     }
