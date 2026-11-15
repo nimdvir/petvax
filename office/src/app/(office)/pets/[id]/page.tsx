@@ -5,7 +5,7 @@ import { ageFromDob, formatDate, formatNyDateTime } from "@/lib/time";
 import { updatePet } from "../../clients/actions";
 import { addOutsideVaccine, startVisit } from "../actions";
 import { PetFields } from "@/components/record-forms";
-import { Badge, Button, Card, DL, Empty, Field, Flash, Input, PageHeader, StatusBadge, Table, Td } from "@/components/ui";
+import { Badge, Button, Card, DL, Empty, Field, Flash, Input, LinkButton, PageHeader, StatusBadge, Table, Td } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 export default async function PetPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string>> }) {
@@ -33,7 +33,10 @@ export default async function PetPage({ params, searchParams }: { params: Promis
       <PageHeader title={p.name}
         subtitle={<>{[p.species, p.breed, ageFromDob(p.date_of_birth)].filter(Boolean).join(" · ")} — owner {owners.map((o, i) => <span key={o!.id}>{i > 0 && ", "}<Link className="text-brand-700 underline" href={`/clients/${o!.id}`}>{o!.first_name} {o!.last_name}</Link></span>)}</>}
         back={owners[0] ? { href: `/clients/${owners[0].id}`, label: "Client" } : undefined}
-        actions={can.clinical(profile.role) ? <form action={startVisit.bind(null, id)}><Button>Start visit now</Button></form> : undefined} />
+        actions={can.clinical(profile.role) ? <>
+          {can.issueCertificates(profile.role) && <LinkButton href={`/certificates/new?pet=${id}`} variant="primary">New certificate</LinkButton>}
+          <form action={startVisit.bind(null, id)}><Button variant="secondary">Start full visit</Button></form>
+        </> : undefined} />
       <Flash params={sp} />
       {alerts.length > 0 && (
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" role="note">

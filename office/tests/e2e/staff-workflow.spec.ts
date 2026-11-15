@@ -120,7 +120,7 @@ test("vet runs the full visit: request → schedule → exam → vaccines → ce
   const text = execFileSync("pdftotext", ["-layout", file, "-"], { encoding: "utf8" }).replace(/\s+/g, " ");
   for (const s of [number, "Pepper", "Labrador Retriever", "Female (spayed)", `Jordan Ellis${stamp}`, "350 W 42nd St",
     "Rabies (3-year)", "3-year rabies", "RAB-E2E-1", "SN-998877", `TAG-${stamp}`, "DHPP / DAPP", "DHPP-E2E-2", "E2E Biologics",
-    "exp. Sep 30, 2027", "SC / Right hindlimb", "Taylor Test, DVM", "NY Veterinary License No. E2E-TEST-1", "63 lb"]) {
+    "exp. Sep 30, 2027", "SC / Right hindlimb", "Taylor Test, DVM", "NY License No. E2E-TEST-1", "63 lb", "Rabies Vaccination Certificate", "vaccinated against rabies in accordance with New York State law"]) {
     expect(text, `PDF should contain "${s}"`).toContain(s);
   }
 
@@ -147,6 +147,47 @@ test("vet runs the full visit: request → schedule → exam → vaccines → ce
   await expect(page.getByText(number)).toBeVisible();
   await expect(page.getByRole("img", { name: /Signature of Jordan Ellis/ }).first()).toBeVisible();
   await page.screenshot({ path: "test-results/desktop-pet-history.png", fullPage: true });
+});
+
+test("vet makes a certificate on one screen from the Certificates tab", async ({ page }) => {
+  const { stamp } = ctx();
+  await login(page, "vet");
+  await page.getByRole("link", { name: "Certificates" }).click();
+  await expect(page).toHaveURL(/\/certificates$/);
+  await page.getByRole("link", { name: "New certificate" }).click();
+  await expect(page).toHaveURL(/\/certificates\/new$/);
+  await page.getByLabel("Search pets").fill(`Ellis${stamp}`);
+  await page.getByLabel("Search pets").press("Enter");
+  await page.getByRole("link", { name: /Tofu/ }).click();
+  await expect(page).toHaveURL(/\/certificates\/new\?pet=/);
+  await expect(page.getByRole("heading", { name: "Certificate for Tofu" })).toBeVisible();
+
+  const button = page.getByRole("button", { name: /Sign & create certificate/ });
+  await expect(button).toBeDisabled(); // nothing ticked yet
+  await page.getByRole("checkbox", { name: "FVRCP" }).check();
+  const fvrcp = page.getByRole("region", { name: "FVRCP" });
+  await fvrcp.getByLabel("Manufacturer *").fill("E2E Biologics");
+  await fvrcp.getByLabel("Lot number *").fill("FVR-E2E-3");
+  await fvrcp.getByLabel("Route").selectOption("SC");
+  await expect(fvrcp.getByLabel("Next due")).toHaveValue(/^\d{4}-\d{2}-\d{2}$/); // filled from the 12-month default
+  await page.getByLabel("Notes to print on the certificate (optional)").fill("Healthy exam, no reactions.");
+  await page.screenshot({ path: "test-results/desktop-new-certificate.png", fullPage: true });
+  await button.click();
+  await expect(page.getByText(/Certificate PVX-\d{4}-\d{6} created and signed\./)).toBeVisible();
+
+  const res = await page.request.get(page.url().replace(/\/certificates\/([^/?]+).*$/, "/api/certificates/$1/pdf"));
+  expect(res.status()).toBe(200);
+  const dir = mkdtempSync(path.join(tmpdir(), "pvx-e2e-"));
+  const file = path.join(dir, "quick.pdf");
+  writeFileSync(file, await res.body());
+  writeFileSync("test-results/e2e-quick-certificate.pdf", await res.body());
+  const text = execFileSync("pdftotext", ["-layout", file, "-"], { encoding: "utf8" }).replace(/\s+/g, " ");
+  for (const s of ["Tofu", "Domestic Shorthair", "FVRCP", "FVR-E2E-3", "E2E Biologics", "Healthy exam, no reactions.", "Taylor Test, DVM"]) expect(text).toContain(s);
+  expect(text).not.toContain("Rabies Vaccination Certificate");
+
+  // It's listed on the Certificates tab.
+  await page.getByRole("link", { name: "Certificates" }).click();
+  await expect(page.getByRole("row", { name: /Tofu/ })).toBeVisible();
 });
 
 test("returning client reusing the link updates their record instead of duplicating it", async ({ page }) => {

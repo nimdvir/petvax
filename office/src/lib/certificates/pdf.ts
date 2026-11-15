@@ -132,6 +132,80 @@ export async function renderCertificatePdf(snap: CertificateSnapshot, assets: Re
     return true;
   };
 
+  /** One page per rabies vaccine, laid out like PetVax's existing New York rabies certificate. */
+  function drawRabiesPage(v: CertificateSnapshot["vaccinations"][number]) {
+    header();
+    text("Rabies Vaccination Certificate", M, y, 20, bold);
+    const sub = `New York State  |  Certificate No. ${snap.certificate_number}`;
+    page.drawText(safe(sub), { x: PAGE_W - M - regular.widthOfTextAtSize(sub, 9.5), y: y + 4, size: 9.5, font: regular, color: MUTED });
+    y -= 26;
+    const section = (title: string, rows: [string, string][]) => {
+      page.drawRectangle({ x: M, y: y - 5, width: PAGE_W - 2 * M, height: 18, color: accent });
+      text(title.toUpperCase(), M + 8, y, 9, bold, rgb(1, 1, 1));
+      y -= 22;
+      for (const [k, val] of rows) {
+        const lines = wrap(safe(val), regular, 9.5, PAGE_W - 2 * M - 160);
+        text(k, M + 8, y, 8.5, bold, MUTED);
+        lines.forEach((l, i) => text(l, M + 150, y - i * 11.5, 9.5));
+        y -= lines.length * 11.5 + 2.5;
+        page.drawLine({ start: { x: M + 150, y: y + 10 }, end: { x: PAGE_W - M, y: y + 10 }, thickness: 0.3, color: RULE });
+      }
+      y -= 10;
+    };
+    const sexFull = snap.pet.sex + (snap.pet.spayed_neutered == null ? "" : snap.pet.spayed_neutered
+      ? (snap.pet.sex === "Female" ? ", spayed" : snap.pet.sex === "Male" ? ", neutered" : ", spayed/neutered") : ", intact");
+    const years = v.duration_months && v.duration_months % 12 === 0 ? `${v.duration_months / 12} year${v.duration_months === 12 ? "" : "s"}` : v.duration_months ? `${v.duration_months} months` : nr;
+    const lot = [v.lot_number, v.serial_number && v.serial_number !== v.lot_number ? `S/N ${v.serial_number}` : null].filter(Boolean).join(" / ");
+    section("Owner information", [
+      ["Owner name", snap.owner.name],
+      ["Address", snap.owner.address ?? nr],
+      ["Phone", snap.owner.phone ?? nr],
+    ]);
+    section("Animal identification", [
+      ["Name", snap.pet.name],
+      ["Species", snap.pet.species],
+      ["Breed", snap.pet.breed ?? nr],
+      ["Sex", sexFull],
+      ["Color / markings", snap.pet.color ?? nr],
+      ["Date of birth / age", [snap.pet.date_of_birth ? formatDate(snap.pet.date_of_birth) : null, snap.pet.age].filter(Boolean).join("  |  ") || nr],
+      ["Microchip", snap.pet.microchip ?? "None on file"],
+    ]);
+    section("Vaccination details", [
+      ["Date of vaccination", formatDate(v.administered_on)],
+      ["Manufacturer", v.manufacturer ?? nr],
+      ["Product name", v.vaccine_name],
+      ["Lot / serial no.", (lot || nr) + (v.lot_expiration ? `  (exp. ${formatDate(v.lot_expiration)})` : "")],
+      ["Duration", years],
+      ["Rabies tag no.", v.rabies_tag_number ?? nr],
+      ["Next due date", v.next_due_on ? formatDate(v.next_due_on) : nr],
+    ]);
+    const vetNames = [
+      [v.administered_by_name, v.administered_by_credentials].filter(Boolean).join(", "),
+      snap.supervising_vet && snap.supervising_vet.name !== v.administered_by_name ? snap.supervising_vet.name : null,
+    ].filter(Boolean).join(" / ");
+    const license = v.administered_by_license ?? snap.supervising_vet?.license_number ?? snap.signer.license_number;
+    section("Veterinarian information", [
+      ["Veterinarian name", vetNames || nr],
+      [`${snap.supervising_vet?.license_state ?? snap.signer.license_state ?? "NY"} license no.`, license || nr],
+      ["Clinic", snap.business.name],
+      ["Clinic address", snap.business.address ?? nr],
+      ["Clinic phone", snap.business.phone ?? nr],
+    ]);
+    const cert = "I hereby certify that the above animal was vaccinated against rabies in accordance with New York State law.";
+    for (const l of wrap(safe(cert), bold, 9.5, PAGE_W - 2 * M)) { text(l, M, y, 9.5, bold); y -= 12; }
+    y -= 6;
+    if (sigImg) {
+      const scale = Math.min(36 / sigImg.height, 180 / sigImg.width);
+      page.drawImage(sigImg, { x: M, y: y - sigImg.height * scale, width: sigImg.width * scale, height: sigImg.height * scale });
+    }
+    y -= 40;
+    page.drawLine({ start: { x: M, y }, end: { x: M + 250, y }, thickness: 0.8, color: INK });
+    page.drawLine({ start: { x: M + 300, y }, end: { x: PAGE_W - M, y }, thickness: 0.8, color: INK });
+    y -= 12;
+    text(`Signature: ${snap.signer.name}${snap.signer.credentials ? `, ${snap.signer.credentials}` : ""}`, M, y, 8.5, regular, MUTED);
+    text(`Date: ${formatDate(snap.issued_on)}`, M + 300, y, 8.5, regular, MUTED);
+  }
+
   // ---------------------------------------------------------------- page 1
   header();
   text("Vaccination Certificate", M, y, 22, bold);
@@ -209,6 +283,7 @@ export async function renderCertificatePdf(snap: CertificateSnapshot, assets: Re
     ];
     const wrapped = cells.map((c, i) => wrap(safe(c), regular, 8.5, cols[i].w - 10));
     const extra: string[] = [];
+    if (v.previous_doses?.length) extra.push(`Earlier doses: ${v.previous_doses.map((d) => formatDate(d)).join(", ")}`);
     if (v.is_rabies) {
       extra.push(`Rabies tag no.: ${v.rabies_tag_number ?? nr}`);
       extra.push(`Administered by: ${[v.administered_by_name, v.administered_by_credentials].filter(Boolean).join(", ")}${v.administered_by_license ? `, License No. ${v.administered_by_license}` : ""}`);
@@ -228,8 +303,18 @@ export async function renderCertificatePdf(snap: CertificateSnapshot, assets: Re
   });
   y -= 18;
 
+  // Notes
+  if (snap.notes) {
+    const lines = wrap(safe(snap.notes), regular, 9, PAGE_W - 2 * M);
+    ensure(Math.min(lines.length, 12) * 11.5 + 30);
+    text("Notes", M, y, 9, bold, accent);
+    y -= 14;
+    for (const l of lines) { ensure(12); text(l, M, y, 9); y -= 11.5; }
+    y -= 14;
+  }
+
   // Signature block
-  ensure(130);
+  ensure(snap.supervising_vet ? 142 : 130);
   text("Certified by", M, y, 9, bold, accent);
   y -= 10;
   if (sigImg) {
@@ -241,9 +326,19 @@ export async function renderCertificatePdf(snap: CertificateSnapshot, assets: Re
   y -= 13;
   text(`${snap.signer.name}${snap.signer.credentials ? `, ${snap.signer.credentials}` : ""}`, M, y, 10, bold);
   y -= 12;
-  text(`${snap.signer.license_state ?? ""} Veterinary License No. ${snap.signer.license_number}`.trim(), M, y, 9, regular, MUTED);
-  y -= 12;
-  text(`Electronically signed ${formatDate(snap.issued_on)} by the issuing veterinarian through PetVax Office.`, M, y, 8, regular, MUTED);
+  if (snap.signer.license_number) {
+    text(`${snap.signer.license_state ?? ""} License No. ${snap.signer.license_number}`.trim(), M, y, 9, regular, MUTED);
+    y -= 12;
+  }
+  if (snap.supervising_vet) {
+    const sv = snap.supervising_vet;
+    text(`Supervising veterinarian: ${sv.name}, ${`${sv.license_state ?? ""} License No. ${sv.license_number}`.trim()}`, M, y, 9, regular, MUTED);
+    y -= 12;
+  }
+  text(`Electronically signed ${formatDate(snap.issued_on)} through PetVax Office.`, M, y, 8, regular, MUTED);
+
+  // ---------------------------------------------------------------- rabies certificate page(s)
+  for (const v of snap.vaccinations.filter((x) => x.is_rabies)) drawRabiesPage(v);
 
   // ---------------------------------------------------------------- footer on every page
   pages.forEach((p, i) => {

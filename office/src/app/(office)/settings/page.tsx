@@ -44,6 +44,13 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                 hint="Leave blank to turn copies off. Needs email sending set up (see docs/DEPLOYMENT.md).">
                 <Input type="email" name="notify_email" defaultValue={s?.notify_email ?? ""} />
               </Field>
+              <Field label="Supervising veterinarian (printed on certificates)" hint="Required for rabies certificates unless the signer has their own license number.">
+                <Input name="supervising_vet_name" defaultValue={s?.supervising_vet_name ?? ""} placeholder="Full name" />
+              </Field>
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="License no." className="col-span-2"><Input name="supervising_vet_license" defaultValue={s?.supervising_vet_license ?? ""} /></Field>
+                <Field label="State"><Input name="supervising_vet_license_state" defaultValue={s?.supervising_vet_license_state ?? "NY"} maxLength={2} /></Field>
+              </div>
               <Field label="Certificate footer text" className="sm:col-span-2"><Textarea name="certificate_footer" defaultValue={s?.certificate_footer ?? ""} /></Field>
               <Field label="Certificate accent color"><Input type="color" name="certificate_accent_color" defaultValue={s?.certificate_accent_color} className="h-11" /></Field>
               <Field label="Default visit length (minutes)"><Input name="default_visit_minutes" defaultValue={s?.default_visit_minutes} /></Field>

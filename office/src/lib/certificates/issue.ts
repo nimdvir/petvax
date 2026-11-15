@@ -39,7 +39,7 @@ export type IssueResult =
  * Issue a certificate as the signed-in veterinarian. `db` must be the vet's own client so
  * Row Level Security enforces that only a vet can issue, and only in their own name.
  */
-export async function issueCertificate(db: Db, opts: { vaccinationIds: string[]; issuerId: string; siteUrl: string }): Promise<IssueResult> {
+export async function issueCertificate(db: Db, opts: { vaccinationIds: string[]; issuerId: string; siteUrl: string; notes?: string | null }): Promise<IssueResult> {
   const draft = await buildCertificateDraft(db, opts);
   if (draft.readiness.blocking.length) return { ok: false, readiness: draft.readiness };
 

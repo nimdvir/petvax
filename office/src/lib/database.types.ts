@@ -13,6 +13,9 @@ export type Database = {
           email: string | null;
           id: boolean;
           notify_email: string | null;
+          supervising_vet_license: string | null;
+          supervising_vet_license_state: string | null;
+          supervising_vet_name: string | null;
           phone: string | null;
           tagline: string | null;
           timezone: string;
@@ -29,6 +32,9 @@ export type Database = {
           email?: string | null;
           id?: boolean;
           notify_email?: string | null;
+          supervising_vet_license?: string | null;
+          supervising_vet_license_state?: string | null;
+          supervising_vet_name?: string | null;
           phone?: string | null;
           tagline?: string | null;
           timezone?: string;
@@ -44,6 +50,9 @@ export type Database = {
           email?: string | null;
           id?: boolean;
           notify_email?: string | null;
+          supervising_vet_license?: string | null;
+          supervising_vet_license_state?: string | null;
+          supervising_vet_name?: string | null;
           phone?: string | null;
           tagline?: string | null;
           timezone?: string;

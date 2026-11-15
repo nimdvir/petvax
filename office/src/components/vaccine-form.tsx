@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export interface ProductOption {
   id: string; name: string; manufacturer: string | null; default_route: string | null; default_site: string | null;
-  default_interval_months: number | null; is_rabies: boolean;
+  default_interval_months: number | null; is_rabies: boolean; vaccine_type?: string;
   last?: { manufacturer: string | null; lot_number: string | null; serial_number: string | null; lot_expiration: string | null; route: string | null; site: string | null } | null;
 }
 

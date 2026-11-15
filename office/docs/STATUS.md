@@ -31,11 +31,12 @@ Legend: **Done & tested** = implemented and verified by automated tests that wri
 | Certificate email to client | Partial | Gmail SMTP or Resend + delivery log; SMTP path tested end to end against a local mail catcher. Needs a Gmail app password (or Resend key) in Vercel |
 | Copy of every submission and certificate to petvaxnyc@gmail.com | Done & tested (local mail catcher) | Same email setup required on Vercel |
 | Never invent credentials/data | Done & tested | Issuing blocked without license number/credentials/required vaccine data |
-| Rabies certificate legal requirements | **Needs review** | Shows tag no., serial/lot, duration, administering licensed vet. Confirm against current NY State / NYC requirements before relying on it as an official rabies certificate |
+| One-screen certificate (Certificates → New certificate) | Done & tested | Pick pet → tick vaccines (lots pre-filled) → one button records the visit + vaccines and issues the PDF. Unit, integration and browser tests |
+| Rabies certificate legal requirements | **Needs review** | Separate NY rabies page modeled on PetVax's own form: owner, animal ID, manufacturer, product, lot/serial, duration, tag, next due, vet name + NY license, clinic, certification statement. Confirm against current NY State / NYC requirements |
 | Jotform import with external ids, idempotent, signatures/files/raw JSON preserved, reconciliation report | Done & tested (synthetic data) | **Blocked for real data**: needs a read-only API key from the Jotform account that owns forms 262500538572052 and 262500542108042 |
 | Backups & restore | Done & tested (local) | Restore drill proves identical data, chains, files |
 | Production database | Done | Applied to the PetVax Supabase project after a verified backup (the old tables held no rows); security advisor shows no issues for Office tables. The 7 old empty tables still have RLS off (not touched) |
 | Hosting / domain | Partial | Vercel project `petvax` (team dima-media) builds every push to this branch; behind Vercel login. No custom domain yet |
 | Save every submission + certificate PDF to Google Drive, with index.csv | Done & tested (simulated Drive) | The real Apps Script code is executed in tests against an in-memory Drive and called over HTTP by the app. Needs the one-time setup in GOOGLE_DRIVE.md; not yet run against the real Drive |
-| Staff accounts | Done | petvaxnyc@gmail.com (admin); Michael Christian Andersen (vet) — his credentials and license number must be entered in Settings → Staff before he can issue certificates |
+| Staff accounts | Done | petvaxnyc@gmail.com (admin); Michael Christian Andersen (vet) — his credentials must be entered in Settings → Staff before he can sign; rabies certificates also need a license number (his own, or the supervising veterinarian's in Settings) |
 | Retire Jotform | Not started (by design) | Only after real import is reconciled and signatures/attachments verified |

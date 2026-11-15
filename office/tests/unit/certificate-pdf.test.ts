@@ -18,9 +18,37 @@ describe("certificate PDF", () => {
       "Rex", "Dog", "Beagle", "Male (neutered)", "5 years", "985112003456789", "24.5 lb",
       "Rabies (3-year)", "3-year rabies", "TestPharma", "RB-4471", "exp. Aug 31, 2027", "Nov 14, 2029",
       "Rabies tag no.: NYC-55821", "DHPP / DAPP", "DH-2210", "Nov 14, 2027", "SC / Right hind",
-      "Test Vet, DVM", "NY Veterinary License No. TEST-000",
-      "Verify this certificate: https://office.petvax.org/verify/a1b2c3d4e5f6a7b8c9", "Page 1 of 1",
+      "Test Vet, DVM", "NY License No. TEST-000",
+      "Verify this certificate: https://office.petvax.org/verify/a1b2c3d4e5f6a7b8c9", "Page 1 of 2",
     ]) expect(t).toContain(expected);
+  });
+
+  it("adds a New York rabies certificate page for each rabies vaccine", async () => {
+    const t = pdfToText(await renderCertificatePdf(sampleSnapshot())).replace(/\s+/g, " ");
+    const rabies = t.slice(t.indexOf("Rabies Vaccination Certificate"));
+    for (const expected of [
+      "New York State", "OWNER INFORMATION", "ANIMAL IDENTIFICATION", "Sex Male, neutered", "VACCINATION DETAILS",
+      "Product name Rabies (3-year)", "Lot / serial no. RB-4471", "Duration 3 years", "Rabies tag no. NYC-55821",
+      "Next due date Nov 14, 2029", "VETERINARIAN INFORMATION", "NY license no. TEST-000",
+      "vaccinated against rabies in accordance with New York State law", "Page 2 of 2",
+    ]) expect(rabies).toContain(expected);
+  });
+
+  it("prints earlier series doses, notes and the supervising veterinarian; no rabies page without rabies", async () => {
+    const snap = sampleSnapshot();
+    snap.vaccinations = [{ ...snap.vaccinations[1], previous_doses: ["2026-10-10", "2026-10-31"] }];
+    snap.signer = { ...snap.signer, name: "Pat Tech", credentials: "LVT, VTS", license_number: "" };
+    snap.supervising_vet = { name: "Dr. Sam Super", license_number: "LIC-123", license_state: "NY" };
+    snap.notes = "Healthy exam. T 101.5 F.";
+    const pdf = await renderCertificatePdf(snap);
+    const t = pdfToText(pdf).replace(/\s+/g, " ");
+    expect(t).toContain("Earlier doses: Oct 10, 2026, Oct 31, 2026");
+    expect(t).toContain("Notes Healthy exam. T 101.5 F.");
+    expect(t).toContain("Pat Tech, LVT, VTS");
+    expect(t).toContain("Supervising veterinarian: Dr. Sam Super, NY License No. LIC-123");
+    expect(t).not.toContain("License No. undefined");
+    expect(t).not.toContain("Rabies Vaccination Certificate");
+    expect((await PDFDocument.load(pdf)).getPageCount()).toBe(1);
   });
 
   it("says 'Not recorded' instead of inventing missing details", async () => {

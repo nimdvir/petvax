@@ -22,7 +22,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     <>
       <Flash params={sp} />
       <PageHeader title={`Hi, ${profile.full_name.split(" ")[0]}`} subtitle={formatNyDateTime(new Date()).replace(/,? \d+:\d+.*$/, "")}
-        actions={<><LinkButton href="/appointments/new" variant="primary">New appointment</LinkButton><LinkButton href="/clients/new">New client</LinkButton></>} />
+        actions={<>{profile.role === "vet" && <LinkButton href="/certificates/new" variant="primary">New certificate</LinkButton>}<LinkButton href="/appointments/new" variant={profile.role === "vet" ? "secondary" : "primary"}>New appointment</LinkButton><LinkButton href="/clients/new">New client</LinkButton></>} />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Today's visits">
           {appts.data?.length ? (

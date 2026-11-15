@@ -22,6 +22,8 @@ export interface CertificateVaccine {
   administered_by_name: string | null;
   administered_by_credentials: string | null;
   administered_by_license: string | null;
+  /** Earlier doses of the same vaccine type on file (for puppy/kitten series), oldest first. Absent on older certificates. */
+  previous_doses?: string[];
 }
 
 export interface CertificateSnapshot {
@@ -40,6 +42,10 @@ export interface CertificateSnapshot {
   };
   vaccinations: CertificateVaccine[];
   signer: { name: string; credentials: string; license_number: string; license_state: string | null; signature_path: string | null };
+  /** Licensed veterinarian printed alongside the signer (from Settings). Absent on older certificates. */
+  supervising_vet?: { name: string; license_number: string; license_state: string | null } | null;
+  /** Optional notes printed on the certificate (e.g. short exam summary). */
+  notes?: string | null;
   verify_url: string;
 }
 
@@ -56,6 +62,22 @@ export interface CertificateDraft {
   readiness: Readiness;
 }
 
+type Staff = Pick<Database["public"]["Tables"]["staff_profiles"]["Row"], "role" | "active" | "credentials" | "license_number">;
+type Settings = Pick<Database["public"]["Tables"]["app_settings"]["Row"], "supervising_vet_name" | "supervising_vet_license">;
+
+/** What stops this person from signing a certificate (empty when they can sign). */
+export function signerProblems(issuer: Staff | null | undefined, settings: Settings | null | undefined, hasRabies: boolean): string[] {
+  const out: string[] = [];
+  if (!issuer || !issuer.active) return ["Your staff profile is missing or inactive."];
+  if (issuer.role !== "vet") out.push("Only a clinician with signing rights can issue certificates.");
+  if (!issuer.credentials) out.push("Add your professional credentials (e.g. DVM, LVT) in Settings > Staff before issuing.");
+  // A rabies certificate must name a licensed veterinarian: the signer, or the supervising veterinarian from Settings.
+  if (hasRabies && !issuer.license_number && !(settings?.supervising_vet_name && settings?.supervising_vet_license)) {
+    out.push("A rabies certificate needs a licensed veterinarian: add your license number in Settings > Staff, or the supervising veterinarian's name and license number in Settings.");
+  }
+  return out;
+}
+
 const speciesLabel = (s: string, other: string | null) => (s === "other" ? other || "Other" : s[0].toUpperCase() + s.slice(1));
 const sexLabel = (s: string) => (s === "unknown" ? "Not recorded" : s[0].toUpperCase() + s.slice(1));
 
@@ -64,7 +86,7 @@ const sexLabel = (s: string) => (s === "unknown" ? "Not recorded" : s[0].toUpper
  * Nothing is filled in by guesswork: missing optional details print as "Not recorded",
  * and missing required details block issuing.
  */
-export async function buildCertificateDraft(db: Db, opts: { vaccinationIds: string[]; issuerId: string }): Promise<CertificateDraft> {
+export async function buildCertificateDraft(db: Db, opts: { vaccinationIds: string[]; issuerId: string; notes?: string | null }): Promise<CertificateDraft> {
   const blocking: string[] = [];
   const warnings: string[] = [];
   if (!opts.vaccinationIds.length) throw new Error("Choose at least one vaccination");
@@ -91,15 +113,19 @@ export async function buildCertificateDraft(db: Db, opts: { vaccinationIds: stri
   const issuer = issuerRes.data;
   const primary = pet.pet_owners.find((po) => po.is_primary)?.owners ?? pet.pet_owners[0]?.owners;
   if (!primary) throw new Error("This pet has no owner on file");
+  const supervising = settings.supervising_vet_name && settings.supervising_vet_license
+    ? { name: settings.supervising_vet_name, license_number: settings.supervising_vet_license, license_state: settings.supervising_vet_license_state }
+    : null;
+  const hasRabies = rows.some((r) => r.is_rabies);
 
-  // ---- Issuer (signing veterinarian) ----
-  if (!issuer || !issuer.active) blocking.push("Your staff profile is missing or inactive.");
-  else {
-    if (issuer.role !== "vet") blocking.push("Only a veterinarian can sign and issue certificates.");
-    if (!issuer.license_number) blocking.push("Add your veterinary license number in Settings > Staff before issuing.");
-    if (!issuer.credentials) blocking.push("Add your professional credentials (e.g. DVM) in Settings > Staff before issuing.");
-    if (!issuer.signature_path) warnings.push("No signature image on file; the certificate will carry your electronic signature statement only.");
-  }
+  // ---- Issuer (the clinician signing the certificate) ----
+  blocking.push(...signerProblems(issuer, settings, hasRabies));
+  if (issuer?.active && !issuer.signature_path) warnings.push("No signature image on file; the certificate will carry your electronic signature statement only.");
+
+  // Earlier doses of the same vaccine types (puppy/kitten series), shown on the certificate.
+  const earlier = (await db.from("vaccinations").select("id, vaccine_type, administered_on")
+    .eq("pet_id", petId).eq("status", "active").in("vaccine_type", [...new Set(rows.map((r) => r.vaccine_type))])
+    .order("administered_on")).data ?? [];
 
   // ---- Vaccinations ----
   const vaccines: CertificateVaccine[] = [];
@@ -115,9 +141,7 @@ export async function buildCertificateDraft(db: Db, opts: { vaccinationIds: stri
     const giver = v.administered_by_profile;
     if (v.is_rabies) {
       if (!v.duration_months) blocking.push(`${label}: rabies vaccine duration (1 or 3 years) is required.`);
-      if (!giver || giver.role !== "vet" || !giver.license_number) {
-        blocking.push(`${label}: a rabies certificate must show a licensed veterinarian as the administering professional.`);
-      }
+      if (giver && giver.role !== "vet") blocking.push(`${label}: rabies vaccine must be given by a clinician, not office staff.`);
       if (!v.rabies_tag_number) warnings.push(`${label}: rabies tag number is not recorded.`);
       if (!v.serial_number && !v.lot_number) blocking.push(`${label}: rabies vaccine serial/lot number is required.`);
     }
@@ -128,6 +152,8 @@ export async function buildCertificateDraft(db: Db, opts: { vaccinationIds: stri
       next_due_on: v.next_due_on, route: v.route, site: v.site, duration_months: v.duration_months, rabies_tag_number: v.rabies_tag_number,
       administered_by_name: giver?.full_name ?? v.administered_by_name, administered_by_credentials: giver?.credentials ?? null,
       administered_by_license: giver?.license_number ?? null,
+      previous_doses: earlier.filter((e) => e.vaccine_type === v.vaccine_type && e.administered_on < v.administered_on && !opts.vaccinationIds.includes(e.id))
+        .map((e) => e.administered_on).filter((d, i, a) => a.indexOf(d) === i),
     });
   }
 
@@ -165,6 +191,8 @@ export async function buildCertificateDraft(db: Db, opts: { vaccinationIds: stri
         name: issuer?.full_name ?? "", credentials: issuer?.credentials ?? "", license_number: issuer?.license_number ?? "",
         license_state: issuer?.license_state ?? null, signature_path: issuer?.signature_path ?? null,
       },
+      supervising_vet: supervising && supervising.license_number !== issuer?.license_number ? supervising : null,
+      notes: opts.notes?.trim() || null,
     },
   };
 }

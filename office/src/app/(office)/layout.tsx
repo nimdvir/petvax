@@ -7,6 +7,7 @@ export default async function OfficeLayout({ children }: { children: React.React
   const links = [
     { href: "/", label: "Today" },
     { href: "/appointments", label: "Appointments" },
+    { href: "/certificates", label: "Certificates" },
     { href: "/clients", label: "Clients" },
     { href: "/submissions", label: "Submissions" },
     { href: "/reminders", label: "Due soon" },

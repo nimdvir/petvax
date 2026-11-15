@@ -1,5 +1,11 @@
 "use server";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyCertificate } from "@/lib/notify";
+import { archiveCertificate } from "@/lib/drive-archive";
+import { publicEnv } from "@/lib/env";
+import { createQuickCertificate, parseQuickForm } from "@/lib/certificates/quick";
 import { requireStaff } from "@/lib/auth";
 import { fstr, msg } from "@/lib/fd";
 import { escapeHtml, sendEmail } from "@/lib/email";
@@ -43,4 +49,22 @@ export async function voidCertificate(certificateId: string, fd: FormData) {
   const r = await supabase.from("certificates").update({ status: "voided", voided_reason: reason }).eq("id", certificateId);
   if (r.error) redirect(msg(`/certificates/${certificateId}`, "error", r.error.message));
   redirect(msg(`/certificates/${certificateId}`, "ok", "Certificate voided. Verification now shows it as void."));
+}
+
+export async function createCertificateForPet(petId: string, fd: FormData) {
+  const { supabase, userId } = await requireStaff(["vet"]);
+  const page = `/certificates/new?pet=${petId}`;
+  const result = await createQuickCertificate(supabase, { ...parseQuickForm(petId, fd), issuerId: userId, siteUrl: publicEnv.siteUrl });
+  if (!result.ok) {
+    // Vaccines were saved but the certificate could not be issued: send the vet to the visit to finish.
+    if (result.encounterId) redirect(msg(`/visits/${result.encounterId}`, "error", `Vaccines saved, but the certificate wasn't issued: ${result.problems.join(" ")}`));
+    redirect(msg(page, "error", result.problems.join(" ")));
+  }
+  const certificateId = result.certificateId;
+  after(async () => {
+    const admin = createAdminClient();
+    await notifyCertificate(admin, { certificateId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("notify failed", e));
+    await archiveCertificate(admin, { certificateId, siteUrl: publicEnv.siteUrl }).catch((e) => console.error("drive archive failed", e));
+  });
+  redirect(msg(`/certificates/${certificateId}`, "ok", `Certificate ${result.certificateNumber} created and signed.`));
 }

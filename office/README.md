@@ -16,6 +16,20 @@ It replaces Jotform. The public website (repo root, www.petvax.org) is separate 
 6. **Certificate** — *Sign & generate certificate*. The PDF is built from the saved records, numbered (PVX-YYYY-NNNNNN), stored privately and fingerprinted. Download/print or email it to the client.
 7. Everything stays on the pet's history page.
 
+### Fastest way to a certificate (one screen)
+
+*Certificates → New certificate* (also on the home page and on every pet page):
+
+1. Tap one of **today's patients**, or search by pet name, client name or phone.
+2. **Tick the vaccines given.** Manufacturer, lot, vial expiry, route and site fill in from the last vial used; the next-due
+   date follows the duration. Vaccines the client asked for are pre-ticked. Optional notes print on the certificate.
+3. **Sign & create certificate.** This records the visit and the vaccines and issues the signed PDF in one step. Nothing is
+   saved if anything required is missing. A copy is emailed to the office and saved to Google Drive automatically.
+
+Earlier doses of the same vaccine (puppy/kitten series) print on the certificate, and each rabies vaccine also gets a
+**New York rabies certificate page** laid out like PetVax's existing form. The full exam workflow above is still there
+when you want a complete SOAP note.
+
 ## Customizing forms (no code)
 
 *Forms → Edit form*: rename questions, add/remove/reorder questions and sections, change answer types and choices,
@@ -25,8 +39,11 @@ version. Old submissions and signatures always keep the exact version and consen
 
 ## Customizing certificates
 
-*Settings*: business name, contact details, footer text and accent color. *Settings → Staff*: each vet's credentials,
-license number and (optional) signature image — enter these from the license; the app never fills them in.
+*Settings*: business name, contact details (the address and phone print on rabies certificates), footer text, accent color,
+and the **supervising veterinarian** (name + license number) printed next to the signer. *Settings → Staff*: each
+clinician's credentials (e.g. DVM, or LVT, VTS), license number and (optional) signature image — enter these from the
+license; the app never fills them in. A technician without their own license number can sign certificates; a rabies
+certificate additionally needs a licensed veterinarian on it (their own license or the supervising veterinarian's).
 A certificate can't be issued while required data is missing (manufacturer, lot/serial, rabies duration, licensed vet…);
 optional details that are missing print as "Not recorded".
 
