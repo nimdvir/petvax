@@ -55,6 +55,9 @@ function childFolder(parent, name) {
 
 function csvCell(v) {
   var s = v === null || v === undefined ? '' : String(v);
+  // A customer can enter a name or note that starts with a spreadsheet formula.
+  // Keep the index safe when opened in Sheets/Excel; never execute submitted text.
+  if (/^\s*[=+@-]/.test(s)) s = "'" + s;
   return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
