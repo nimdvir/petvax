@@ -1,7 +1,7 @@
 # PetVax Office
 
 The private staff app for PetVax house-call vaccinations: client forms with e-signatures, clients and pets,
-appointments, pre-vaccination exams (SOAP), vaccine records, and one-click PDF vaccine certificates.
+appointments, pre-vaccination exams (SOAP), vaccine records, and one-click PDF vaccine certificates. Finalized SOAP notes and amendments are also archived to Drive as separate PDFs once Drive is configured.
 It replaces Jotform. The public website (repo root, www.petvax.org) is separate and unchanged.
 
 **Stack:** Next.js 15 (App Router, TypeScript) · Supabase (Postgres, Auth, Storage) · Tailwind CSS · pdf-lib · Vitest · Playwright
