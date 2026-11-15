@@ -56,8 +56,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             <div id="drive" />
             <p className="mb-3 text-sm text-gray-600">
               Every form submission (as a PDF with answers, consent and signature) and every certificate PDF is saved to the
-              Drive folder <strong>PetVax › PetVax Office archive</strong>, in <em>Form submissions</em> and <em>Certificates</em>
-              folders by month, with an <em>index.csv</em> listing every file.
+              Drive folder <strong>PetVax › PetVax Office archive</strong>, in <em>Form submissions</em> and{" "}
+              <em>Certificates</em> folders by month, with an <em>index.csv</em> listing every file.
               {!driveReady && " Finish the one-time setup in docs/GOOGLE_DRIVE.md to turn it on."}
             </p>
             {driveReady && <form action={archiveMissingNow} className="mb-3"><SubmitButton variant="secondary" pendingText="Saving…">Save anything not yet in Drive</SubmitButton></form>}
