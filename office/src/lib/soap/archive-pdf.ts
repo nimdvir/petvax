@@ -34,12 +34,11 @@ export async function renderSoapArchivePdf(input: SoapArchiveInput): Promise<Uin
   const width = 612, height = 792, margin = 44;
   let page = doc.addPage([width, height]);
   let y = height - margin;
-  let pageNo = 1;
   const write = (value: string, x: number, size = 9, f: PDFFont = font, color = dark) => {
     page.drawText(safe(value), { x, y, size, font: f, color });
   };
   const next = () => {
-    page = doc.addPage([width,height]); y = height-margin; pageNo++;
+    page = doc.addPage([width,height]); y = height-margin;
     write(`${input.clinic} · SOAP note (continued)`,margin,9,bold,accent); y-=24;
   };
   const needs = (points: number) => { if (y - points < margin + 26) next(); };
