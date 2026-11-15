@@ -31,6 +31,17 @@ describe("Google Drive archive script (integrations/google-drive-archive.gs)", (
     expect(g.find(["PetVax Office archive", "Form submissions", "2026", "2026-11"])!.files).toHaveLength(1);
   });
 
+  it("quotes customer-provided spreadsheet formulas as plain text in the archive index", () => {
+    const g = loadArchiveScript();
+    const response = g.doPost(item({
+      csvRow: ["Nov 15", "=HYPERLINK(\"https://example.test\")", " +SUM(1,2)"],
+    }));
+    expect(response.ok).toBe(true);
+    const csv = g.find(["PetVax Office archive"])!.files.find((f) => f.name === "index.csv")!.content.toString();
+    expect(csv).toContain("'=HYPERLINK");
+    expect(csv).toContain("' +SUM(1,2)");
+  });
+
   it("rejects requests without the shared secret", () => {
     const g = loadArchiveScript();
     expect(g.doPost(item({ secret: "wrong" }))).toEqual({ ok: false, error: "Not authorized" });
