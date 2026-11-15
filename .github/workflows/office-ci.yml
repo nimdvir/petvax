@@ -32,7 +32,11 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - name: Start local Supabase (test data only)
-        run: npm run db:start
+        # Supabase's local ports (54321-54325) fall inside Linux's default ephemeral port range, so an
+        # outgoing connection can occasionally occupy one first. Move the ephemeral range above them.
+        run: |
+          sudo sysctl -w net.ipv4.ip_local_port_range="60000 65000"
+          npm run db:start
       - name: Write local env
         run: |
           npx supabase status -o json > /tmp/sb.json
