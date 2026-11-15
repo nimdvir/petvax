@@ -1,6 +1,6 @@
 # Google Drive archive
 
-Every form submission and every certificate is saved automatically to the **PetVax** Drive folder:
+Every form submission, finalized SOAP revision (including amendments), and certificate is saved automatically to the **PetVax** Drive folder:
 
 ```
 PetVax/
@@ -8,13 +8,13 @@ PetVax/
     ├── index.csv                      ← one line per saved file (date, type, client, pets, details, status, links, SHA-256)
     ├── Form submissions/2026/2026-11/
     │   └── 2026-11-15 0930 - Rivera, Dana - Rex & Miso - PetVax New Visit Form (70aa8d2a).pdf
-    └── Certificates/2026/2026-11/
+    ├── SOAP notes/2026/2026-11/\n    │   └── 2026-11-15 - Rex - Rivera, Dana - SOAP revision 2 - 70aa8d2a.pdf\n    └── Certificates/2026/2026-11/
         └── PVX-2026-001001 - Rex - Rivera, Dana - 2026-11-15.pdf
 ```
 
 - **Form submission PDFs** contain every answer, the exact consent wording, the drawn signature, the time, and the
   fingerprints (hashes) that prove the record wasn't changed.
-- **Certificate PDFs** are the exact files stored in Office (byte-for-byte identical).
+- **Finalized SOAP PDFs** show the visit, recorded vitals/BCS, SOAP sections, clinician, and exact signed-off revision. Every dated amendment becomes a separate PDF; drafts remain inside Office.\n- **Certificate PDFs** are the exact files stored in Office (byte-for-byte identical).
 - Saving is automatic and never delays the client or the vet. Each attempt is listed in *Office → Settings → Google
   Drive archive*. If Drive was unreachable (or before setup), press **Save anything not yet in Drive** there.
 - Saving the same record twice never creates duplicates.
