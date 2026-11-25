@@ -1,3 +1,6 @@
+# PetVax: search engines and AI assistants are welcome.
+# A plain-text summary for AI agents: https://www.petvax.org/llms.txt
 User-agent: *
 Allow: /
+
 Sitemap: https://www.petvax.org/sitemap.xml

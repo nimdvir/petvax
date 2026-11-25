@@ -1,0 +1,31 @@
+# PetVax
+
+> PetVax brings dog and cat vaccinations and microchipping to your home. It serves Hell's Kitchen and nearby neighborhoods in Manhattan, New York City, only.
+
+Key facts:
+- Service: at-home vaccinations and microchipping for dogs and cats
+- Area served: Hell's Kitchen and surrounding neighborhoods, Manhattan, New York, NY
+- Price: $75 per visit, including one vaccine; each additional vaccine during the same visit is $75; microchipping is $75
+- Fastest way to book: text (347) 644-0551
+- Book online: https://www.petvax.org/book.html
+- Each visit includes a quick exam to make sure the pet is healthy enough to be vaccinated. PetVax sends a reminder one month before a booster is due.
+
+## Pages
+
+- [Home](https://www.petvax.org/): services, prices, vaccine explanations and sample vaccination schedules
+- [Book an appointment](https://www.petvax.org/book.html): online booking form
+
+## Vaccines offered
+
+Dogs, core: Rabies (legally required in New York), DHPPi (distemper, hepatitis, parainfluenza, parvovirus), Leptospirosis (strongly recommended in New York).
+Dogs, non-core: Bordetella (kennel cough), Lyme, Canine Influenza.
+Cats, core: Rabies (legally required in New York, even for indoor cats), FVRCP, Feline Leukemia Virus (recommended for kittens).
+
+## Sample schedules
+
+Puppies: 8, 12 and 16 weeks (distemper series; leptospirosis at 12 and 16 weeks; rabies at 12 weeks; optional Bordetella, Lyme and canine influenza).
+Kittens: 8, 12 and 16 weeks (FVRCP series; feline leukemia at 12 and 16 weeks; rabies at 12 weeks).
+Adult dogs: rabies and distemper every three years; Bordetella every 6 to 12 months; leptospirosis, canine influenza and Lyme yearly.
+Adult cats: rabies and FVRCP every three years; feline leukemia every other year for at-risk cats.
+
+Schedules are examples. PetVax tailors a schedule to each pet.
