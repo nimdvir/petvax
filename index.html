@@ -64,12 +64,13 @@
             right: 0;
             bottom: 0;
             z-index: 40;
-            background-color: #b91c1c; /* red-700 */
-            color: #fff;
-            font-weight: 800;
-            font-size: 1.125rem;
-            text-align: center;
-            padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+            display: flex;
+            align-items: stretch;
+            gap: 0.5rem;
+            background-color: rgba(185, 28, 28, 0.92); /* red-700 */
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
             box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
             transform: translateY(100%);
             transition: transform 0.3s ease;
@@ -131,6 +132,77 @@
         #mobile-menu.open {
             max-height: 400px;
         }
+
+        /* Keep section headings clear of the fixed navbar when jumping to them */
+        section[id] { scroll-margin-top: 5rem; }
+
+        /* ===== Hero background: soft glow + paw pattern ===== */
+        .hero-bg {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(255,255,255,0.18), transparent 45%),
+                radial-gradient(circle at 90% 85%, rgba(0,0,0,0.25), transparent 50%),
+                linear-gradient(160deg, #dc2626 0%, #b91c1c 45%, #7f1d1d 100%);
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg fill='%23ffffff' fill-opacity='0.07' transform='rotate(-20 45 45)'%3E%3Cellipse cx='45' cy='54' rx='12' ry='10'/%3E%3Ccircle cx='31' cy='38' r='5'/%3E%3Ccircle cx='41' cy='31' r='5'/%3E%3Ccircle cx='51' cy='31' r='5'/%3E%3Ccircle cx='60' cy='38' r='5'/%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .hero-bg > * { position: relative; }
+        .hero-title {
+            text-shadow: 0 6px 24px rgba(0,0,0,0.35);
+        }
+
+        /* ===== Scroll reveal (only when JS runs and motion is OK) ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.2,.7,.2,1);
+        }
+        .reveal.in-view {
+            opacity: 1;
+            transform: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+            .pulse-ring::after { animation: none !important; }
+        }
+
+        /* Gentle attention pulse on the main "Text us" button */
+        .pulse-ring { position: relative; }
+        .pulse-ring::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            box-shadow: 0 0 0 0 rgba(220,38,38,0.55);
+            animation: pulse-ring 2.2s ease-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 rgba(220,38,38,0.55); }
+            70%  { box-shadow: 0 0 0 16px rgba(220,38,38,0); }
+            100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+        }
+
+        /* Schedule tabs: swipeable pill row on phones */
+        .tab-row::-webkit-scrollbar { display: none; }
+        .tab-row { scrollbar-width: none; }
+
+        /* Instagram embed: height follows width (header + 2 rows of 3 posts) */
+        .ig-wrap { container-type: inline-size; }
+        .ig-frame {
+            display: block;
+            width: 100%;
+            height: 480px;
+            height: calc(150px + 66.7cqw);
+            border: 0;
+            background: #fff;
+        }
     </style>
     <meta name="description" content="At-home dog and cat vaccinations and microchipping in Hell's Kitchen, NYC. $75 visit including one vaccine. Text (347) 644-0551 or book online.">
 <meta name="author" content="PetVax">
@@ -167,6 +239,9 @@
    "description": "At-home vaccinations and microchipping for dogs and cats in Hell's Kitchen, Manhattan, New York.",
    "url": "https://www.petvax.org/",
    "telephone": "+1-347-644-0551",
+   "sameAs": [
+    "https://www.instagram.com/petvaxnyc/"
+   ],
    "image": "https://www.petvax.org/assets/logo.jpg",
    "logo": "https://www.petvax.org/assets/logo.jpg",
    "priceRange": "$75",
@@ -325,24 +400,24 @@
     <div class="h-16"></div>
 
     <!-- Hero Section -->
-<header class="bg-red-700 text-white py-24 text-center rounded-b-3xl shadow-xl">
+<header class="hero-bg bg-red-700 text-white pt-8 pb-14 sm:py-24 text-center rounded-b-[2.5rem] sm:rounded-b-3xl shadow-xl">
   <!-- Highlighted Texting Box -->
-        <div class="bg-red-50 border-2 border-red-600 rounded-2xl p-6 text-center shadow-lg transform transition hover:scale-105">
+        <div class="bg-red-50 border-2 border-red-600 rounded-3xl p-6 mx-4 sm:mx-auto max-w-xl text-center shadow-2xl transform transition hover:scale-105">
           <h3 class="text-2xl font-bold text-red-700 mb-3">📱 Fastest Response: Text Us!</h3>
           <p class="text-base text-gray-700 mb-4">Texting is the quickest way to schedule your in-home vaccination or microchipping service.</p>
           <a href="sms:+13476440551" id="hero-text-btn"
-             class="inline-block bg-red-600 text-white font-extrabold py-4 px-8 rounded-full shadow-md hover:bg-red-700 transition duration-300">
+             class="pulse-ring inline-block bg-red-600 text-white font-extrabold py-4 px-8 rounded-full shadow-md hover:bg-red-700 transition duration-300">
             Text (347) 644-0551
           </a>
         </div>
         <br>
-  <p class="text-sm sm:text-base font-bold uppercase tracking-wide text-white bg-red-800 inline-block py-2 px-4 rounded-lg shadow-md">
+  <p class="text-xs sm:text-base font-bold uppercase tracking-wide text-white bg-red-900/70 backdrop-blur inline-block py-2 px-4 mx-4 rounded-full shadow-md">
       We proudly serve Hell’s Kitchen and surrounding neighborhoods only
     </p>
     <br>
     <br>
     <div class="container mx-auto px-4">
-    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
+    <h1 class="hero-title text-6xl md:text-7xl font-extrabold tracking-tight mb-3">
       PetVax
     </h1>
     <p class="text-xl sm:text-2xl font-light max-w-2xl mx-auto mb-8">
@@ -381,7 +456,7 @@
     <main class="container mx-auto px-4 py-16">
 
 <!-- About Us Section -->
-  <section id="about" class="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-16 text-black">
+  <section id="about" class="bg-white rounded-3xl shadow-lg p-6 md:p-12 mb-16 text-black">
     <h2 class="text-3xl font-bold text-red-700 mb-6 border-b-2 border-red-200 pb-3">About Us</h2>
 
     <div class="flex flex-col md:flex-row items-center md:space-x-8 space-y-8 md:space-y-0">
@@ -400,11 +475,11 @@
         <p class="pt-4">With PetVax, caring for your furry friends has never been simpler, more affordable, or more accessible.</p>
       </div>
 
-      <!-- Image Column -->
-      <div class="md:w-1/2 flex justify-center">
+      <!-- Image Column (shown first on phones) -->
+      <div class="md:w-1/2 flex justify-center order-first md:order-none w-full">
         <img src="assets/michael2.jpg" 
              alt="A licensed professional from PetVax examining a pet." 
-             class="w-full h-auto rounded-2xl shadow-lg object-cover">
+             class="w-full h-auto rounded-2xl shadow-xl object-cover ring-4 ring-red-100">
       </div>
     </div>
   </section>
@@ -414,7 +489,7 @@
             <h2 class="text-3xl font-bold text-red-700 mb-6 text-center">Our Vaccination Services</h2>
             
             <!-- Why Vaccinate Section with Image -->
-            <div class="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-8 text-black flex flex-col md:flex-row items-center md:space-x-8 space-y-8 md:space-y-0">
+            <div class="bg-white rounded-3xl shadow-lg p-6 md:p-12 mb-8 text-black flex flex-col md:flex-row items-center md:space-x-8 space-y-8 md:space-y-0">
                 <div class="md:w-1/2">
                     <h3 class="text-2xl font-semibold text-gray-800 mb-4">Why Vaccinate Your Pet?</h3>
                     <p class="text-lg leading-relaxed">Vaccines play a vital role in safeguarding your pet’s health. By exposing your pet’s immune system to a harmless or inactive form of infectious agents, vaccines help their body develop immunity. This prepares their immune system to effectively combat the real thing if they are ever exposed. The diseases that vaccines prevent range from mildly irritating to potentially fatal, making vaccination a simple, painless, and cost-effective way to protect your pet.</p>
@@ -425,7 +500,7 @@
             </div>
 
             <!-- Core and Non-Core Vaccines Section with expandable sections-->
-            <div class="bg-white rounded-3xl shadow-lg p-8 md:p-12 text-black">
+            <div class="bg-white rounded-3xl shadow-lg p-6 md:p-12 text-black">
                 <h3 class="text-2xl font-semibold text-gray-800 mb-4">Understanding Core and Non-Core Vaccines</h3>
                 <p class="text-lg leading-relaxed mb-8">Vaccines are categorized as either ‘core’ or ‘non-core.’ Core vaccines are essential for all pets, while non-core vaccines are optional and may be recommended based on your pet’s lifestyle and environment.</p>
 
@@ -475,10 +550,10 @@
 
             <div class="bg-white rounded-3xl shadow-lg p-6 text-black">
                 <!-- Tab Buttons -->
-                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-                    <button class="tab-button active bg-red-700 text-white font-bold py-3 px-6 rounded-full shadow-md hover:bg-red-600 transition-colors duration-300" data-target="puppy-schedule">Puppy Vaccine Schedule</button>
-                    <button class="tab-button bg-gray-200 text-black font-bold py-3 px-6 rounded-full shadow-md hover:bg-gray-300 transition-colors duration-300" data-target="kitten-schedule">Kitten Vaccine Schedule</button>
-                    <button class="tab-button bg-gray-200 text-black font-bold py-3 px-6 rounded-full shadow-md hover:bg-gray-300 transition-colors duration-300" data-target="adult-schedule">Adult Vaccine Schedules</button>
+                <div class="tab-row flex gap-2 sm:gap-4 overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0 mb-8 snap-x">
+                    <button class="tab-button active bg-red-700 text-white snap-start shrink-0 whitespace-nowrap text-sm sm:text-base font-bold py-3 px-5 sm:px-6 rounded-full shadow-md hover:bg-red-600 transition-colors duration-300" data-target="puppy-schedule">Puppy Vaccine Schedule</button>
+                    <button class="tab-button bg-gray-200 text-black snap-start shrink-0 whitespace-nowrap text-sm sm:text-base font-bold py-3 px-5 sm:px-6 rounded-full shadow-md hover:bg-gray-300 transition-colors duration-300" data-target="kitten-schedule">Kitten Vaccine Schedule</button>
+                    <button class="tab-button bg-gray-200 text-black snap-start shrink-0 whitespace-nowrap text-sm sm:text-base font-bold py-3 px-5 sm:px-6 rounded-full shadow-md hover:bg-gray-300 transition-colors duration-300" data-target="adult-schedule">Adult Vaccine Schedules</button>
                 </div>
 
                 <!-- Tab Content Containers -->
@@ -609,7 +684,7 @@
         </section>
 
         <!-- Form Section -->
-        <section id="contact-form" class="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-16 text-black text-center">
+        <section id="contact-form" class="bg-white rounded-3xl shadow-lg p-6 md:p-12 mb-16 text-black text-center">
             <h2 class="text-3xl font-bold text-red-700 mb-6 border-b-2 border-red-200 pb-3">Book an Appointment</h2>
             <p class="text-lg text-gray-700 mb-6">Ready to protect your furry friend? Schedule your convenient at-home vaccination visit in just a few minutes.</p>
             <a href="book.html"
@@ -619,8 +694,23 @@
             <p class="text-gray-500 text-sm">Or text us directly at <a href="sms:+13476440551" id="footer-text-btn" class="text-red-600 font-bold hover:underline">(347) 644-0551</a></p>
         </section>
         
+        <!-- Instagram Section -->
+        <section id="instagram" class="bg-white rounded-3xl shadow-lg p-6 md:p-12 mb-16 text-black text-center">
+            <h2 class="text-3xl font-bold text-red-700 mb-2">Follow Us on Instagram</h2>
+            <p class="text-lg text-gray-700 mb-6">Happy patients, house calls, and pet-care tips around NYC.</p>
+            <div class="ig-wrap max-w-[480px] mx-auto rounded-2xl overflow-hidden shadow-lg ring-1 ring-gray-200">
+                <iframe class="ig-frame" src="https://www.instagram.com/petvaxnyc/embed" title="PetVax on Instagram (@petvaxnyc)" loading="lazy" scrolling="no" allowtransparency="true"></iframe>
+            </div>
+            <a href="https://www.instagram.com/petvaxnyc/" target="_blank" rel="noopener"
+               class="inline-flex items-center space-x-2 mt-6 text-white font-extrabold py-3 px-8 rounded-full shadow-lg transition-transform duration-300 hover:scale-105"
+               style="background: linear-gradient(45deg, #f58529, #dd2a7b 50%, #8134af 80%, #515bd4);">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                <span>Follow @petvaxnyc</span>
+            </a>
+        </section>
+
         <!-- Business Card Section -->
-        <section class="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-16 text-black">
+        <section class="bg-white rounded-3xl shadow-lg p-6 md:p-12 mb-16 text-black">
             <h2 class="text-3xl font-bold text-red-700 mb-6 border-b-2 border-red-200 pb-3 text-center">Our Business Card</h2>
             <img src="assets/bizcard.jpg" alt="PetVax business card." class="w-full max-w-xl mx-auto h-auto rounded-3xl shadow-lg">
         </section>
@@ -629,10 +719,17 @@
 
     <!-- Footer -->
     <!-- Sticky "Text us" bar (phones/tablets, appears on scroll) -->
-    <a href="sms:+13476440551" id="sticky-text-btn" class="sticky-text-bar">💬 Text us: (347) 644-0551</a>
+    <div id="sticky-bar" class="sticky-text-bar">
+        <a href="sms:+13476440551" id="sticky-text-btn" class="flex-1 flex items-center justify-center rounded-full bg-white text-red-700 font-extrabold text-base py-3 px-3 shadow">💬 Text (347) 644-0551</a>
+        <a href="book.html" class="flex items-center justify-center rounded-full bg-black text-white font-extrabold text-base py-3 px-5 shadow">📋 Book</a>
+    </div>
 
     <footer class="bg-red-900 text-white pt-8 pb-20 lg:pb-8 text-center rounded-t-3xl shadow-inner">
         <div class="container mx-auto px-4">
+            <a href="https://www.instagram.com/petvaxnyc/" target="_blank" rel="noopener" class="inline-flex items-center space-x-2 mb-3 font-semibold hover:text-red-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                <span>@petvaxnyc</span>
+            </a>
             <p>&copy; 2025 PetVax. All rights reserved.</p>
         </div>
     </footer>
@@ -698,7 +795,7 @@
     const menuIconClose = document.getElementById('menu-icon-close');
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('section[id]');
-    const stickyTextBar = document.getElementById('sticky-text-btn');
+    const stickyTextBar = document.getElementById('sticky-bar');
 
     // Scroll: toggle white → red bg
     window.addEventListener('scroll', () => {
@@ -741,6 +838,25 @@
             menuIconClose.classList.add('hidden');
         });
     });
+
+    // =============================================
+    // SCROLL REVEAL: cards fade/slide in as they enter view
+    // =============================================
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const revealTargets = document.querySelectorAll('main > section.bg-white, main > section:not(.bg-white) > *');
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        revealTargets.forEach(el => {
+            el.classList.add('reveal');
+            io.observe(el);
+        });
+    }
 
     // =============================================
     // TEXT & CALL REDIRECT TO CONFIRMATION PAGES
